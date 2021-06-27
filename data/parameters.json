@@ -1,0 +1,4 @@
+[{"name": "PM2.5", "beschreibung":"Beschreibung von PM10","grenzwerte":{"jahresmittel":1}},
+{"name": "PM10", "beschreibung":"Beschreibung von PM10","grenzwerte":{"jahresmittel":1}},
+{"name": "O3", "beschreibung":"Beschreibung von PM10","grenzwerte":{"jahresmittel":1}}
+]
