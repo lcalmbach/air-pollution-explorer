@@ -1,3 +1,5 @@
+import pytz
+
 ABOUT_APP_TEXT = """This app has been developed by [Lukas Calmbach](mailto:lcalmbach@gmail.com) using 
         [Python](https://www.python.org/), [Streamlit](https://streamlit.io/) and [Altair]
         (https://altair-viz.github.io/). All sourcecode is published on [github](https://github.com/lcalmbach/ede).
@@ -33,3 +35,4 @@ DBT_LOOKUP = 6
 DBT_SYSLOOKUP = 7
 
 STAT_FUNCTIONS_LIST = ['sum','count','avg','min','max','std']
+tz_GMT = pytz.timezone('Europe/London')

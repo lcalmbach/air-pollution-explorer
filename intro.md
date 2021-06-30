@@ -1,15 +1,11 @@
-## Luftschadstoffe in Basel
-Die Open Gouvernment Data Plattform des Kantons Basel stellt stündlich Daten zur Luftqualität zur Verfügung. Die Applikation Air-Pollution-Explorer erlaubt Visualisierungen und statistische Auswertungen, die über die Möglichkeit der OGD-Plattform hinausgehen. Neue Daten werden täglich importiert.
-### Parameter
-{}
-### Grenzwerte
-| Schadstoff  | Grenze  |Beschreibung   |
-|---|---|---|
-| PM2.5 |10µg/m3 | yearly average |
-| PM10 |20µg/m3 | yearly average |
-| PM10 |50µg/m3 | 24h average, may be exceeded only 3 times per year |
-| Ozone |100µg/m3 | 98% of half hour averages <100µg/m3 |
-| Ozone |120µg/m3 | 1h average may be exceeded one time per year |
+## Luftqualität Explorer Basel-Stadt
+Die Open Gouvernment Data Plattform des Kantons Basel stellt stündlich Daten zur Luftqualität an verschiedenen Messstellen zur Verfügung. Die Applikation Air-Pollution-Explorer erlaubt die Visualisierungen und statistische Auswertungen dieser Daten, die über die Möglichkeit der OGD-Plattform hinausgehen. Neue Daten werden täglich importiert. Zur Zeit stehen Daten von {0} Stationen für die Jahre {1} bis {2} zur Verfügung. Neuster Record ist {3}. Alle Zeitangaben werden als Standard Central-Europe-Time (CET) ausgegeben, um Probleme der Zeitreihe beim Wechsel zur Sommerzeit zu vermeiden. Die aktuelle CET-Zeit ist: {4}.
 
-### Stationen
-{}
+### Datenquellen und Ressouren
+- [Open Government Data Basel](opendata.bs.ch)
+- [Lufthygieneamt beider Basel](https://www.baselland.ch/politik-und-behorden/direktionen/bau-und-umweltschutzdirektion/lufthygiene)
+- [Luftqualität Nordwestschweiz](https://luftqualitaet.ch/)
+- [Luftqaulität Oberrhein](http://www.luft-am-oberrhein.net/)
+- [Bundesamt für Umwelt: Feinstaub](https://www.bafu.admin.ch/bafu/de/home/themen/luft/fachinformationen/luftqualitaet-in-der-schweiz/feinstaub.html)
+- [Air Quality in Europe](https://www.airqualitynow.eu/index.php)
+- [Luftschadstoff-Glossar des BAFU](https://www.bafu.admin.ch/bafu/de/home/themen/luft/luftschadstoff-glossar.html)
