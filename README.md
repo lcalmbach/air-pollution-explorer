@@ -1,2 +1,2 @@
-# air-pollution-explorer
-this app visualizes the concentrations for PM10, PM2.5 and ozone highlighing trends and exceedances
+# Luftqualität Explorer Basel (LQX-bs)
+This app visualizes the concentrations for PM10, PM2.5 and ozone highlighing trends and exceedances. Data is avalailable from 2003 and currently from 1 station, it is planned to extend the data to all 3 existing air quality stations in Basel. Data is kept locally in a python quartet format (saved pandas dataframe). When starting a session, the datasource (data.bs) is checked for new data and if new records are found, these records are loaded from data.bs and added to the local data table.
