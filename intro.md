@@ -1,5 +1,5 @@
 ## Luftqualität Explorer Basel-Stadt
-Die Open Gouvernment Data Plattform des Kantons Basel stellt stündlich Daten zur Luftqualität an verschiedenen Messstellen zur Verfügung. Die Applikation Air-Pollution-Explorer erlaubt die Visualisierungen und statistische Auswertungen dieser Daten, die über die Möglichkeit der OGD-Plattform hinausgehen. Neue Daten werden täglich importiert. Zur Zeit stehen Daten von {0} Stationen für die Jahre {1} bis {2} zur Verfügung. Neuster Record ist {3}. Alle Zeitangaben werden als Standard Central-Europe-Time (CET) ausgegeben, um Probleme der Zeitreihe beim Wechsel zur Sommerzeit zu vermeiden. Die aktuelle CET-Zeit ist: {4}.
+Die Open Gouvernment Data Plattform des Kantons Basel stellt stündlich Daten zur Luftqualität an verschiedenen Messstellen zur Verfügung. Die Applikation LQX.bs erlaubt die Visualisierungen und statistische Auswertungen dieser Daten, die über die Analyse-Möglichkeit der OGD-Plattform hinausgehen. Neue Daten werden täglich importiert. Zur Zeit stehen Daten von {0} Stationen für die Jahre {1} bis {2} zur Verfügung. Neuster Record ist {3}. Alle Zeitangaben werden als Standard Central-Europe-Time (CET) ausgegeben, um Probleme der Zeitreihe beim Wechsel zur Sommerzeit zu vermeiden. Die aktuelle CET-Zeit ist: {4}.
 
 ### Datenquellen und Ressouren
 - [Open Government Data Basel](https://www.opendata.bs.ch/)

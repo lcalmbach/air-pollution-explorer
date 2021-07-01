@@ -26,13 +26,8 @@ TOOLTIP_FONTSIZE = 'x-small'
 TOOLTIP_BACKCOLOR = 'white'
 TOOLTIP_FORECOLOR = 'black'
 
-DBT_VARCHAR = 1
-DBT_NON_DECIMAL = 2
-DBT_DECIMAL = 3
-DBT_BOOLEAN = 4
-DBT_DATE = 5
-DBT_LOOKUP = 6
-DBT_SYSLOOKUP = 7
-
 STAT_FUNCTIONS_LIST = ['sum','count','avg','min','max','std']
 tz_GMT = pytz.timezone('Europe/London')
+
+MONTHS_DICT = {1:'Jan',2:'Feb',3:'Mrz',4:'Apr',5:'Mai',6:'Jun',7:'Jul',8:'Aug',9:'Sep',10:'Okt',11:'Nov',12:'Dez',}
+MONTHS_REV_DICT = {'Jan': 1,'Feb':2,'Mrz':3,'Apr':4,'Mai':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Okt':10,'Nov':11,'Dez':12,}

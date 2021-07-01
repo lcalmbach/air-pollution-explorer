@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 
 from queries import qry
-import tools
+#import tools
+import config
 from st_aggrid import AgGrid
 
 class App:
@@ -41,8 +42,10 @@ class App:
             percentile_.__name__ = 'percentile_%s' % n
             return percentile_
 
-        jahr = st.sidebar.selectbox('Jahr', options = range(self.start_jahr, self.end_jahr))
-        monat = st.sidebar.selectbox('Monat', options = range(1, 12))
+        jahr = st.sidebar.selectbox('Jahr', options = range(self.start_jahr, self.end_jahr+1))
+        monat = st.sidebar.selectbox('Monat', options = range(1, 13))
+        text = f"Statistik der Luftschadstoffe {', '.join(self.parameters)} für Station {self.station['name']} im {config.MONTHS_DICT[monat]} {jahr}."
+        st.markdown(text)
         _df = self.df_data[(self.df_data['jahr']==jahr) & (self.df_data['monat'] == monat)]
         for par in list(self.df_parameters['name']):
             st.markdown(f'**{par}**')
@@ -57,11 +60,13 @@ class App:
             percentile_.__name__ = 'percentile_%s' % n
             return percentile_
 
-        jahr = st.sidebar.selectbox('Jahr', options = range(self.start_jahr, self.end_jahr))
-        _df = self.df_data[self.df_data['jahr']==jahr]
-        text = f"Für {self.station['name']} wurden Messungen von {self.start_jahr} bis {self.end_jahr} durchgeführt."
+        jahr = st.sidebar.selectbox('Jahr', options = range(self.start_jahr, self.end_jahr + 1))
+
+        text = f"Statistik der Luftschadstoffe {', '.join(self.parameters)} für Station {self.station['name']} im Jahr {jahr}."
         st.markdown(text)
-        for par in list(self.df_parameters['name']):
+
+        _df = self.df_data[self.df_data['jahr']==jahr]
+        for par in self.parameters:
             st.markdown(f'**{par}**')
             _stats = _df.groupby(['jahr', 'monat'])[par].agg(['min','max','mean', 'std', percentile(5), percentile(25), percentile(50), percentile(75), percentile(90), percentile(99), 'count'])
             AgGrid(_stats.reset_index())
@@ -73,12 +78,12 @@ class App:
             percentile_.__name__ = 'percentile_%s' % n
             return percentile_
 
+        
         jahre = st.sidebar.slider('Jahr', self.start_jahr, self.end_jahr, (self.start_jahr, self.end_jahr))
-        _df = self.df_data[self.df_data['jahr'].isin(range(jahre[0], jahre[1]) )]
-        text = f"Für {self.station['name']} wurden Messungen von {self.start_jahr} bis {self.end_jahr} durchgeführt."
+        text = f"Statistik der Luftschadstoffe {','.join(self.parameters)} für Station {self.station['name']} für die Jahre {self.start_jahr} bis {self.end_jahr}."
         st.markdown(text)
-        parameters = ['jahr',] + list(self.df_parameters['name'])
-        for par in list(self.df_parameters['name']):
+        _df = self.df_data[self.df_data['jahr'].isin(range(jahre[0], jahre[1]) )]
+        for par in self.parameters:
             st.markdown(f'**{par}**')
             _stats = _df.groupby(['jahr'])[par].agg(['min','max','mean', 'std', percentile(5), percentile(25), percentile(50), percentile(75), percentile(90), percentile(99), 'count'])
             AgGrid(_stats.reset_index())
@@ -88,19 +93,18 @@ class App:
         _df = self.df_data[self.df_data['jahr'].isin(range(jahre[0], jahre[1]) )]
         text = f"Für {self.station['name']} wurden Messungen von {self.start_jahr} bis {self.end_jahr} durchgeführt."
         st.markdown(text)
-        parameters = ['jahr',] + list(self.df_parameters['name'])
-        for par in list(self.df_parameters['name']):
+        for par in self.parameters:
             st.markdown(f'**{par}**')
             _stats = pd.DataFrame()
             AgGrid(_stats.reset_index())
 
     def show_menu(self):
         _station_id = st.sidebar.selectbox('Station', list(self.dic_stations.keys()),
-                format_func=lambda x: self.dic_stations[x])    
+            format_func=lambda x: self.dic_stations[x])    
         self.station = self.df_stations.loc[_station_id]
         type_options = ['nach Jahr', 'nach Monat', 'nach Tag','Grenzwert Überschreitungen']
         stat_type = st.sidebar.selectbox("Statistik", options=type_options)
-        
+        self.parameters = st.sidebar.multiselect("Parameters",options = list(self.df_parameters['name']), default=list(self.df_parameters['name']))
         
         if stat_type == 'nach Jahr':
             self.show_yearly_stats()

@@ -6,11 +6,10 @@ import altair as alt
 import calendar
 
 from queries import qry
-import tools
+import config
 from st_aggrid import AgGrid
 
-MONTHS_DICT = {1:'Jan',2:'Feb',3:'Mrz',4:'Apr',5:'Mai',6:'Jun',7:'Jul',8:'Aug',9:'Sep',10:'Okt',11:'Nov',12:'Dez',}
-MONTHS_REV_DICT = {'Jan': 1,'Feb':2,'Mrz':3,'Apr':4,'Mai':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Okt':10,'Nov':11,'Dez':12,}
+
 class App:
     """
     """
@@ -23,7 +22,7 @@ class App:
             self.df_data['woche'] = df_data['zeit'].dt.isocalendar().week
             self.df_data['jahr'] = df_data['zeit'].dt.year    
             self.df_data['monat'] = df_data['zeit'].dt.month 
-            self.df_data['monat'] = self.df_data['monat'].replace(MONTHS_DICT)
+            self.df_data['monat'] = self.df_data['monat'].replace(config.MONTHS_DICT)
             self.df_data['mitte_woche'] = pd.to_datetime(df_data['datum']) - pd.to_timedelta(df_data['zeit'].dt.dayofweek % 7 - 2, unit='D')
             #self.df_data['mitte_woche'] = df_data['mitte_woche_datum'].dt.date 
             self.df_data['mitte_monat'] = pd.to_datetime(df_data['datum']) - pd.to_timedelta(df_data['zeit'].dt.day + 14, unit='D')
@@ -48,15 +47,12 @@ class App:
         pass
 
     def show_barchart(self):
-        def settings():
+        def get_settings():
             self.settings['agg_time'] = st.sidebar.selectbox("Aggregiere Messungen nach",options=['Jahr','Monat','Jahr-Monat','Jahr-Woche','Jahr-Tag','Monat-Stunde'])
-            
-
             self.settings['par'] = st.sidebar.selectbox("Parameter",options=self.lst_parameters)
-            self.settings['group_by'] = st.sidebar.selectbox("Gruppiere Grafiken nach",options=['Keine Gruppierung', 'Jahr', 'Parameter'])
             self.settings['years'] = st.sidebar.slider('🔍Jahr', self.start_jahr, self.end_jahr, (self.start_jahr, self.end_jahr))
             if self.settings['agg_time'] == 'Monat-Stunde':
-                self.settings['monat'] = st.sidebar.selectbox("Parameter",options=list(MONTHS_DICT.values()))
+                self.settings['monat'] = st.sidebar.selectbox("Parameter",options=list(config.MONTHS_DICT.values()))
 
         def filter_data():
             df = self.df_data
@@ -87,48 +83,66 @@ class App:
                 self.settings['x_par'] = 'mitte_monat'
                 self.settings['tooltip'] = ['jahr','monat', self.settings['y_par']]
                 self.settings['x_axis_format'] = "%b %Y"
+                self.settings['bar_width'] = 4
             if self.settings['agg_time'] == 'Jahr-Woche':
                 df = df.groupby(['mitte_woche', 'jahr','monat'])[self.settings['par']].agg(['mean'])
                 df = df.rename(columns = {'mean': self.settings['y_par']})
                 self.settings['x_par'] = 'mitte_woche'
                 self.settings['tooltip'] = ['jahr','monat', self.settings['y_par']]
+                self.settings['bar_width'] = 2
             if self.settings['agg_time'] == 'Jahr-Tag':
                 df = df.groupby(['datum'])[self.settings['par']].agg(['mean'])
                 df = df.rename(columns = {'mean': self.settings['y_par']})
                 self.settings['x_par'] = 'datum'
                 self.settings['tooltip'] = ['datum', self.settings['y_par']]
                 self.settings['x_axis_format'] = "%Y-%m-%d"
+                self.settings['bar_width'] = 2
             if self.settings['agg_time'] == 'Monat-Stunde':
                 df = df.groupby(['stunde'])[self.settings['par']].agg(['mean'])
                 df = df.rename(columns = {'mean': self.settings['y_par']})
                 self.settings['x_par'] = 'stunde'
                 self.settings['tooltip'] = ['zeit', self.settings['y_par']]
                 self.settings['x_axis_format'] = ""
+                self.settings['x_scale'] = (1,23)
             
             
             df = df.reset_index()
             #st.write(df)
             return df
 
-        settings()
-        if self.settings['group_by'] == 'Keine Gruppierung':
-            df = filter_data()
-            df = aggregate_data(df)
-            
-            df_guideline = pd.DataFrame({self.settings['y_par']: [10]})
-            df_guideline2 = pd.DataFrame({self.settings['y_par']: [25]})
-            line1 = alt.Chart(df_guideline).mark_rule(color='red').encode(y=self.settings['y_par'], tooltip=self.settings['y_par'])
-            line2 = alt.Chart(df_guideline2).mark_rule(color='darkorange').encode(y=self.settings['y_par'], tooltip=self.settings['y_par'])
-
-            chart = alt.Chart(df).mark_bar(width = self.settings['bar_width']).encode(  # width = 800/len(df)
-                x=alt.X(self.settings['x_par'], axis=alt.Axis(title='', format=self.settings['x_axis_format']), sort = list(MONTHS_REV_DICT)),
-                y=alt.Y(self.settings['y_par'],
-                    axis=alt.Axis(title=self.settings['par'] + '(µg/m3)')),
-            ).properties(width=800,height=300)
-            guidelines = line1 if line2 == None else line1 + line2
-            st.altair_chart(chart + guidelines )
+        get_settings()
+        df = filter_data()
+        df = aggregate_data(df)
+        
+        if 'x_scale' in self.settings:
+            x_scale = alt.Scale(domain=self.settings['x_scale'])
         else:
-            pass
+            x_scale = alt.Scale()
+        if 'y_scale' in self.settings:
+            y_scale = alt.Scale(domain=self.settings['y_scale'])
+        else:
+            y_scale = alt.Scale()
+        df_guideline = pd.DataFrame({'Grenzwert Jahresmittel': [10]})
+        df_guideline2 = pd.DataFrame({'Grenzwert Tagesmittel': [25]})
+
+        line1_color = alt.Color('Grenzwert Jahresmittel', scale=alt.Scale(scheme='bluepurple'))
+        line1 = alt.Chart(df_guideline).mark_rule(color='red').encode(y='Grenzwert Jahresmittel', tooltip='Grenzwert Jahresmittel')
+        line2 = alt.Chart(df_guideline2).mark_rule(color='darkorange').encode(y='Grenzwert Tagesmittel', tooltip='Grenzwert Tagesmittel')
+        
+        chart = alt.Chart(df).mark_bar(clip=True, width = self.settings['bar_width']).encode(  # width = 800/len(df)
+            x=alt.X(self.settings['x_par'], 
+                scale=x_scale, 
+                axis=alt.Axis(title='', format=self.settings['x_axis_format']), 
+                sort = list(config.MONTHS_REV_DICT)),
+            y=alt.Y(self.settings['y_par'], 
+                scale=y_scale, 
+                axis=alt.Axis(title=self.settings['par'] + '(µg/m3)')),
+            tooltip = self.settings['tooltip']
+        ).properties(width=800,height=300)
+        guidelines = line1 if line2 == None else line1 + line2
+        st.altair_chart(chart + guidelines )
+        with st.beta_expander('Data'):
+            AgGrid(df)
 
 
     def show_menu(self):
@@ -146,7 +160,7 @@ class App:
         elif plot_type == 'Boxplot':
             self.show_linechart()
         elif plot_type == 'Heatmap':
-            self.show_linechart()
+            self.show_heatmap()
 
         
     

@@ -43,6 +43,7 @@ def get_data():
         logging.info(f'most recent data in local table has timestamp: {result}')
         return result
 
+
     def data_is_up_to_date(df):
         """
         Verifies whether now() is not more than 1 hours ahead of the most recent record 
@@ -76,41 +77,50 @@ def get_data():
             return url
         
         def extract_data(data):
+            """
+            converts the json string into a dataframe with only the required columns
+            """
+            logging.info(f'Extracting data from jason string')
             data = data['records']
             df_ogd = pd.DataFrame(data)['fields']
             
             # unpack records
             df_ogd = pd.DataFrame(x for x in df_ogd)
-            df_ogd = df_ogd[df_ogd['pm2_5_stundenmittelwerte_ug_m3'] > 0]
-            df_ogd.rename(columns = {'datum_zeit':'zeit', 
-                'pm10_stundenmittelwerte_ug_m3': 'PM10', 
-                'pm2_5_stundenmittelwerte_ug_m3': 'PM2.5',
-                'o3_stundenmittelwerte_ug_m3': 'O3'}
-                , inplace=True)
-            df_ogd = df_ogd[['zeit','PM10','PM2.5','O3']]
-            df_ogd['zeit'] = pd.to_datetime(df_ogd['zeit'])
-            #make sure there are no duplicate records
-            df_ogd = df_ogd[df_ogd['zeit'] > get_most_recent_record(df)]
-            # add station id, todo: make this flexible 
-            df_ogd['station'] = 1 
-            
+            if 'pm2_5_stundenmittelwerte_ug_m3' in (df_ogd.columns):
+                df_ogd = df_ogd[df_ogd['pm2_5_stundenmittelwerte_ug_m3'] > 0]
+                df_ogd.rename(columns = {'datum_zeit':'zeit', 
+                    'pm10_stundenmittelwerte_ug_m3': 'PM10', 
+                    'pm2_5_stundenmittelwerte_ug_m3': 'PM2.5',
+                    'o3_stundenmittelwerte_ug_m3': 'O3'}
+                    , inplace=True)
+                df_ogd = df_ogd[['zeit','PM10','PM2.5','O3']]
+                df_ogd['zeit'] = pd.to_datetime(df_ogd['zeit'])
+                #make sure there are no duplicate records
+                df_ogd = df_ogd[df_ogd['zeit'] > get_most_recent_record(df)]
+                # add station id, todo: make this flexible 
+                df_ogd['station'] = 1 
+            else:
+                df_ogd = pd.DataFrame()
             return df_ogd
         
         data = requests.get(get_url()).json()
         df_ogd = extract_data(data)
 
-        df = df.append(df_ogd)
-        try:
-            df.to_parquet('apox_data.pq')
-        except:
-            st.warning('Aktuellste Daten konnten nicht gespeichert werden')
+        if len(df_ogd) > 0:
+            df = df.append(df_ogd)
+            try:
+                df.to_parquet('./data/apox_data.pq')
+                logging.info(f'Most recent data was added to apox_data.pq file')
+            except:
+                st.warning('Aktuellste Daten konnten nicht gespeichert werden')
         # now add data
         return df 
-
+    
     def get_local_data():
         df_data = pd.read_parquet('./data/apox_data.pq')
         df_stations = pd.read_json('./data/stations.json')
         df_parameters = pd.read_json('./data/parameters.json')
+        logging.info(f'data was read from local files')
         return df_data, df_stations, df_parameters
     
     df_data, df_stations, df_parameters = get_local_data()
