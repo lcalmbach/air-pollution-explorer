@@ -13,7 +13,7 @@ Dieses Schadstoffgemisch besteht aus einer Vielzahl von chemischen Verbindungen 
 
 Husten, Atemnot, Bronchitis und Asthmaanfälle bei Kindern und Erwachsenen
 Atemwegs- und Herzkreislauf-Erkrankungen und damit verbundene Spitaleinweisungen
-Lungenkrebs und vorzeitige Todesfälle. (Text von: [BAFU, Luftqualität](https://www.bafu.admin.ch/bafu/de/home/themen/luft/fachinformationen/luftqualitaet-in-der-schweiz/feinstaub.html))
+Lungenkrebs und vorzeitige Todesfälle. (Quelle: [BAFU, Luftqualität](https://www.bafu.admin.ch/bafu/de/home/themen/luft/fachinformationen/luftqualitaet-in-der-schweiz/feinstaub.html))
 ### Ozon
 Sonnige, windstille Perioden im Sommer haben steigende Ozonbelastungen zur Folge. Diese Verschmutzung wirkt sich sowohl auf die menschliche Gesundheit als auch auf die Vegetation sowie Gebäude, Materialien und das Klima negativ aus. Die Politik des Bundes setzt auf dauerhafte Massnahmen zur Reduktion der Vorläuferschadstoffe (Stickoxide und flüchtige organische Verbindungen).
 
@@ -34,6 +34,6 @@ Die Massnahmen des Bundes zur Reduktion des Sommersmogs konzentrieren sich auf d
 | PM10 |20µg/m3 | Grenzwert für das Jahresmittel |
 | PM10 |50µg/m3 | 24 Stunden Grenzwert, darf 3 mal pro Jahr überschritten werden |
 | Ozone |100µg/m3 | 98% der Halbstunden-Mittelwerte sind kleiner als 100µg/m3 |
-| Ozone |120µg/m3 | Stündlicher Mittelwert darf einmal pro Jahr überschritten wreden |
+| Ozone |120µg/m3 | Stündlicher Mittelwert darf einmal pro Jahr überschritten werden |
 ### Stationen
 {}

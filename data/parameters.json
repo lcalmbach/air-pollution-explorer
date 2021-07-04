@@ -1,4 +1,31 @@
-[{"name": "PM2.5", "beschreibung":"Beschreibung von PM10","grenzwerte":{"jahresmittel":1}},
-{"name": "PM10", "beschreibung":"Beschreibung von PM10","grenzwerte":{"jahresmittel":1}},
-{"name": "O3", "beschreibung":"Beschreibung von PM10","grenzwerte":{"jahresmittel":1}}
-]
+{
+    "PM2.5": 
+        {"name_short": "PM2.5", 
+        "unit": "ug/m3",
+        "name_long": "Feinstaub (PM2.5)",
+        "description":"./feinstaub.md",
+        "guidelines":[
+            {"name": "jahresmittel","value":10,"legend":"Jahresmittel","comment":"Jahresgrenzwert", "color":"red"}
+        ]
+    },
+    "PM10": 
+        {"name_short": "PM10", 
+        "unit": "ug/m3",
+        "name_long": "Feinstaub (PM10)",
+        "description":"./feinstaub.md",
+        "guidelines":[
+            {"name": "jahr","value":20,"legend":"Jahresmittel","comment":"Jahresgrenzwert", "color":"red"},
+            {"name": "tag","value":50,"legend":"Tagesmittel","comment":"24 Stunden Grenzwert, darf 3 mal pro Jahr überschritten werden", "color":"orange"}
+        ]
+    },
+    "O3": 
+        {"name_short": "O3", 
+        "unit": "ug/m3",
+        "name_long": "Ozon",
+        "description":"./O3.md",
+        "guidelines":[
+            {"name": "jahr","value":100,"legend":"Jahresmittel","comment":"98% der Halbstunden-Mittelwerte sind kleiner als 100µg/m3", "color":"red"},
+            {"name": "stunde","value":120,"legend":"Tagesmittel","comment":"Stündlicher Mittelwert darf einmal pro Jahr überschritten werden", "color":"orange"}
+        ]
+    }
+}

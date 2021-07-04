@@ -18,7 +18,7 @@ __version__ = '0.0.1'
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
 VERSION_DATE = '2021-06-12'
-my_name = '🌎Air Pollution Explorer'
+my_name = '🌎Luft-Qualität-Explorer.BS'
 my_kuerzel = "apox"
 GIT_REPO = 'https://github.com/lcalmbach/air-pol-ex'
 
@@ -30,7 +30,6 @@ APP_INFO = f"""<div style="background-color:powderblue; padding: 10px;border-rad
 MENU_DIC = {apox_info: 'Info', apox_stats: 'Statistiken', apox_plots: 'Grafiken'}
 LOGGING_LEVEL = logging.ERROR
 logging.basicConfig(format='%(levelname) %(asctime)s %(message)s', level=LOGGING_LEVEL)
-
 
 
 def get_data():
@@ -82,8 +81,10 @@ def get_data():
             """
             logging.info(f'Extracting data from jason string')
             data = data['records']
-            df_ogd = pd.DataFrame(data)['fields']
-            
+            try:
+                df_ogd = pd.DataFrame(data)['fields']
+            except :
+                print(data['records'])
             # unpack records
             df_ogd = pd.DataFrame(x for x in df_ogd)
             if 'pm2_5_stundenmittelwerte_ug_m3' in (df_ogd.columns):
@@ -130,6 +131,7 @@ def get_data():
 
 
 def main():
+    st.sidebar.markdown(f"## {my_name}")
     app = st.sidebar.selectbox("Menu", options=list(MENU_DIC.keys()),
         format_func=lambda x: MENU_DIC[x])
     #app.show_menu()
