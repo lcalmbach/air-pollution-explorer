@@ -316,54 +316,50 @@ class App:
             if self.settings['agg_time'] in ('Tag','Stunde'):
                 self.settings['monat'] = st.sidebar.selectbox("Parameter",options=list(config.MONTHS_DICT.values()))
 
-        def aggregate_data(df):
+        def aggregate_data(df,):   
             df['monat'] = df['monat'].replace(config.MONTHS_DICT)
-            if self.settings['agg_time'] == 'Monat':
-                df = df.groupby(['jahr','monat'])[self.settings['par']].agg(['mean'])
-                df = df.rename(columns = {'mean': self.settings['par'].replace(".","")}).reset_index()
-                self.settings['color'] = self.settings['par'].replace(".","")
-                self.settings['tooltip'] = list(df.columns)
-                self.settings['x'] = alt.X("monat", 
-                    axis=alt.Axis(title='Monat'), 
-                    sort = list(config.MONTHS_REV_DICT))
-                self.settings['y'] = alt.Y("jahr:O", 
-                    axis=alt.Axis(title='Jahr'))
-                self.settings['color'] = alt.Color(f"{self.settings['color']}:Q")
-            if self.settings['agg_time'] == 'Tag':
-                df = df.groupby(['monat','tag'])[self.settings['par']].agg(['mean'])
-                df = df.rename(columns = {'mean': self.settings['par'].replace(".","")}).reset_index()
-                self.settings['color'] = self.settings['par'].replace(".","")
-                self.settings['tooltip'] = list(df.columns)
-                self.settings['x'] = alt.X("tag:N", 
-                    axis=alt.Axis(title='Tag', tickCount=31),
-                    scale = alt.Scale(domain=(1,31)) ) 
-                self.settings['y'] = alt.Y("monat:O", 
-                    axis=alt.Axis(title='Monat'),
-                    sort = list(config.MONTHS_REV_DICT))
-            if self.settings['agg_time'] == 'Stunde':
-                df = df.groupby(['monat','stunde'])[self.settings['par']].agg(['mean'])
-                df = df.rename(columns = {'mean': self.settings['par'].replace(".","")}).reset_index()
-                self.settings['color'] = f"{self.settings['par'].replace('.','')}:N"
-                self.settings['tooltip'] = list(df.columns)
-                self.settings['x'] = alt.X("stunde:O", 
-                    axis=alt.Axis(title='Tag'),
-                    scale = alt.Scale(domain=(1,24)) ) 
-                self.settings['y'] = alt.Y("monat:O", 
-                    axis=alt.Axis(title='Monat'),
-                    sort = list(config.MONTHS_REV_DICT))
-            return df.dropna()
+            t_agg = dict_agg_variable[self.settings['agg_time']]
+            # df = df[[self.settings['par'], 'jahr', 'monat'] + [t_agg]]
+            df = df.groupby(t_agg['group_by'])[self.settings['par']].agg(['mean'])
+            df = df.rename(columns={'mean': self.settings['par'].replace('.','')}).reset_index()
+            self.settings['tooltip'] = list(df.columns)
+            self.settings['x'] = alt.X(t_agg['x'], 
+                axis=alt.Axis(title=t_agg['x_title']))
+            self.settings['y'] = alt.Y(t_agg['y'], 
+                axis=alt.Axis(title=t_agg['y_title']))
+            #self.settings['y_par'] = self.settings['par'].replace('.','')
+            self.settings['color'] = alt.Color(f"{self.settings['par'].replace('.','')}:Q")
+            return df
 
-        get_settings()
-        df = self.filter_data()
-        df = aggregate_data(df)
-        chart = alt.Chart(df).mark_rect().encode(  
+        
+        def show_plot():
+            chart = alt.Chart(df).mark_rect().encode(  
             x=self.settings['x'],
             y=self.settings['y'],
             color=self.settings['color'],
             tooltip = self.settings['tooltip']
-        ).properties(width=plot_width, height=plot_height)
+            ).properties(width=plot_width, height=plot_height)
+            
+            st.altair_chart(chart)
+
         
-        st.altair_chart(chart)
+        dict_agg_variable = {
+            'Monat':{'x':'monat:N','y':'jahr:N','group_by':['monat','jahr'],'x_title':'Monat','y_title':'Jahr'},
+            'Tag':{'x':'tag:O','y':'monat:O','group_by':['tag','monat'],'x_title':'Tag','y_title':'Monat'},
+            'Stunde':{'x':'stunde:N','y':'tag:N','group_by':['stunde','tag'],'x_title':'Stunde','y_title':'Monat'},
+        }
+        get_settings()
+        dict_titles = {'Jahr':'Jahresmittelwerte', 
+            'Monat':f"Monats-Mittelwerte ({self.settings['years'][0]} bis {self.settings['years'][1]})",
+            'Woche':f"Wochen-Mittelwerte ({self.settings['years'][0]} bis {self.settings['years'][1]})",
+            'Tag': f"Tagesmittelwerte ({self.settings['years'][0]} bis {self.settings['years'][1]})",
+            'Stunde': 'Stunden-Mittelwerte',
+            'Jahr-Monat':'Monatsmittelwerte nach Jahr',
+            'Jahr-Woche':'Wochenmittelwerte nach Jahr'
+        }
+        df = self.filter_data()
+        df = aggregate_data(df)
+        show_plot()
         with st.beta_expander('Data'):
             AgGrid(df)
 
