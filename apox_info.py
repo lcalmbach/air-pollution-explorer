@@ -38,6 +38,8 @@ class App:
 
 
     def show_menu(self):
+        st.image('./images/Roche mit Baustelle im Abendlicht, März 2020.jpg', caption=None, width=None, use_column_width='auto', clamp=False, channels='RGB', output_format='auto')
+        st.markdown('[Quelle Abbildung](https://www.bs.ch/bilddatenbank#tree=6376&details=38519)')
         menu = st.sidebar.selectbox('Auswahl', options = LST_MENU)
         if menu =='Über LQX-BS':
             self.show_about()

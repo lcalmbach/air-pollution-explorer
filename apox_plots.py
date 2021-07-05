@@ -51,10 +51,11 @@ class App:
 
     def filter_data(self):
         df = self.df_data
+
         if 'date_from' in self.settings:
             start_series = self.df_data['datum'].min().to_pydatetime().date()
             end_series = self.df_data['datum'].max().to_pydatetime().date()
-            if self.settings['date_from'] > start_series and self.settings['date_to'] < end_series:
+            if self.settings['date_from'] > start_series or self.settings['date_to'] < end_series:
                 df = df[(df['zeit'].dt.date >= self.settings['date_from']) & (df['zeit'].dt.date <= self.settings['date_to'])]
         if 'years' in self.settings:
             if self.settings['years'][0] != self.start_jahr or self.settings['years'][1] != self.end_jahr:
@@ -78,8 +79,8 @@ class App:
         def get_settings():
             self.settings['agg_time'] = st.sidebar.selectbox("Aggregiere Messungen nach",options=['Jahr','Monat','Woche','Tag'])
             self.settings['par'] = st.sidebar.selectbox("Parameter", options=self.lst_parameters)
-            self.settings['date_from'] = st.sidebar.date_input('Von Datum',datetime(2003,1,1), datetime.now(),datetime(2003,1,1))
-            self.settings['date_to'] = st.sidebar.date_input('Bis Datum',datetime(2003,1,1), datetime.now(), datetime.now())
+            self.settings['date_from'] = st.sidebar.date_input('Von Datum',min_value=datetime(2003,1,1), max_value=datetime.now(),value=datetime(2003,1,1))
+            self.settings['date_to'] = st.sidebar.date_input('Bis Datum',min_value=datetime(2003,1,1), max_value=datetime.now(),value=datetime.now())
 
         
         def aggregate_data(df,):   
@@ -150,8 +151,8 @@ class App:
         def get_settings():
             self.settings['agg_time'] = st.sidebar.selectbox("Aggregiere Messungen nach",options=['Monat','Woche','Tag','Stunde'])
             self.settings['par'] = st.sidebar.multiselect("Parameter", options=self.lst_parameters,default=['PM2.5'])
-            self.settings['date_from'] = st.sidebar.date_input('Von Datum',min_value=datetime(2003,1,1), max_value=datetime.now(), value = datetime(2003,1,1))
-            self.settings['date_to'] = st.sidebar.date_input('Bis Datum',min_value=datetime(2003,1,1), max_value=datetime.now(), value = datetime.now())
+            self.settings['date_from'] = st.sidebar.date_input('Von Datum',min_value=datetime(2003,1,1), max_value=datetime.now(), value=datetime.now()-timedelta(30))
+            self.settings['date_to'] = st.sidebar.date_input('Bis Datum',min_value=datetime(2003,1,1), max_value=datetime.now(), value=datetime.now())
             #if self.settings['agg_time'] in ('Tag','Stunde'):
             #    self.settings['monat'] = st.sidebar.selectbox("Monat",options=list(config.MONTHS_DICT.values()))
             self.settings['show_band'] = st.sidebar.checkbox("Zeige 90% Fläche")
@@ -338,7 +339,7 @@ class App:
             y=self.settings['y'],
             color=self.settings['color'],
             tooltip = self.settings['tooltip']
-            ).properties(width=plot_width, height=plot_height)
+            ).properties(width=plot_width, height=plot_height*1.5)
             
             st.altair_chart(chart)
 
@@ -346,7 +347,7 @@ class App:
         dict_agg_variable = {
             'Monat':{'x':'monat:N','y':'jahr:N','group_by':['monat','jahr'],'x_title':'Monat','y_title':'Jahr'},
             'Tag':{'x':'tag:O','y':'monat:O','group_by':['tag','monat'],'x_title':'Tag','y_title':'Monat'},
-            'Stunde':{'x':'stunde:N','y':'tag:N','group_by':['stunde','tag'],'x_title':'Stunde','y_title':'Monat'},
+            'Stunde':{'x':'stunde:N','y':'tag:N','group_by':['stunde','tag'],'x_title':'Stunde','y_title':'Tag'},
         }
         get_settings()
         dict_titles = {'Jahr':'Jahresmittelwerte', 

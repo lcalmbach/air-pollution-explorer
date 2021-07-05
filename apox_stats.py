@@ -98,7 +98,7 @@ class App:
         _station_id = st.sidebar.selectbox('Station', list(self.dic_stations.keys()),
             format_func=lambda x: self.dic_stations[x])    
         self.station = self.df_stations.loc[_station_id]
-        type_options = ['nach Jahr', 'nach Monat', 'nach Tag','Grenzwert Überschreitungen']
+        type_options = ['nach Jahr', 'nach Monat', 'nach Tag']
         stat_type = st.sidebar.selectbox("Statistik", options=type_options)
         self.parameters = st.sidebar.multiselect("Parameters",options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
         

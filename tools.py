@@ -222,3 +222,12 @@ def percentile(n):
             return np.percentile(x, n)
         percentile_.__name__ = 'percentile_%s' % n
         return percentile_
+
+def add_time_columns(df):
+    df['datum'] = pd.to_datetime(df['zeit']).dt.date
+    df['woche'] = df['zeit'].dt.isocalendar().week
+    df['mitte_woche_datum'] = pd.to_datetime(df['zeit']) - pd.to_timedelta(df['zeit'].dt.dayofweek % 7 - 2, unit='D')
+    df['mitte_woche_datum'] = df['mitte_woche_datum'].dt.date 
+    df['jahr'] = df['zeit'].dt.year    
+    df['monat'] = df['zeit'].dt.month  
+    return df

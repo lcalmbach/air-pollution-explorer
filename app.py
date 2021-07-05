@@ -10,6 +10,7 @@ import requests
 import apox_stats
 import apox_info
 import apox_plots
+import apox_exceedance
 import config as cn
 from datetime import datetime, timedelta
 import config
@@ -27,11 +28,18 @@ APP_INFO = f"""<div style="background-color:powderblue; padding: 10px;border-rad
     version: {__version__} ({VERSION_DATE})<br>
     <a href="{GIT_REPO}">git-repo</a>
     """
-MENU_DIC = {apox_info: 'Info', apox_stats: 'Statistiken', apox_plots: 'Grafiken'}
+MENU_DIC = {apox_info: 'Info', apox_stats: 'Statistiken', apox_plots: 'Grafiken', apox_exceedance:'Grenzwert Überschreitungen'}
 LOGGING_LEVEL = logging.ERROR
 logging.basicConfig(format='%(levelname) %(asctime)s %(message)s', level=LOGGING_LEVEL)
 
 
+def init():
+    st.set_page_config(  # Alternate names: setup_page, page, layout
+        layout="wide",  # Can be "centered" or "wide". In the future also "dashboard", etc.
+        initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
+        page_title='LQX.bs',  # String or None. Strings get appended with "• Streamlit". 
+        page_icon='🌎',  # String, anything supported by st.image, or None.
+    )
 def get_data():
     def get_most_recent_record(df):
         """
@@ -131,6 +139,7 @@ def get_data():
 
 
 def main():
+    init()
     st.sidebar.markdown(f"## {my_name}")
     app = st.sidebar.selectbox("Menu", options=list(MENU_DIC.keys()),
         format_func=lambda x: MENU_DIC[x])

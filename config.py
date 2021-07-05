@@ -14,8 +14,8 @@ USER_MANUAL_LINK: str = 'https://ede.readthedocs.io/en/latest/'
 HELP_ICON: str = 'https://img.icons8.com/offices/30/000000/help.png'
 
 EDEX_HOME = 'p00'
-default_plot_width = 600
-default_plot_height = 400
+default_plot_width = 800
+default_plot_height = 600
 
 LATITUDE_COLUMN = 'latitude'
 LONGITUDE_COLUMN = 'longitude'
