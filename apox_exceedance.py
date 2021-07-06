@@ -37,15 +37,52 @@ class App:
         return (df['jahr'].unique().tolist())
 
     def analyse_excceedances(self, gl, par):
+        def analyse_year():
+            df = self.df_data.groupby([gl['time_agg_field']])[par['name_short']].agg(['mean', 'count']).reset_index()
+            df = df[df[gl['time_agg_field']].isin(self.get_jahre_mit_monatlichen_daten(self.df_data, par['name_short']))]
+            df['exceedance'] = df['mean'] - gl['value']
+            df = df.rename(columns={'jahr':'Jahr', 'mean': 'Mittelwert', 'count': 'Anzahl Messungen', 'exceedance': 'Abweichung vom Grenzwert'} )
+            return df
+
+        def analyse_day():
+            df = self.df_data.groupby(['jahr',gl['time_agg_field']])[par['name_short']].agg(['mean', 'count']).reset_index()
+            df['exceedance'] = df['mean'] - gl['value']
+            df['is_exceedance'] = df['exceedance'].apply(lambda val: 1 if val > 0 else 0)
+            df['no_exceedance'] = abs(df['is_exceedance'] - 1)
+            
+            df = df.groupby(['jahr'])['exceedance','no_exceedance','is_exceedance',].agg(['sum']).reset_index()
+            df['pct_exceedances'] = df['is_exceedance'] / (df['no_exceedance'] + df['is_exceedance']) * 100
+            df.columns = df.columns.map('_'.join)
+            df = df.rename(columns={'jahr_':'Jahr', 'no_exceedance_sum': f"Anz<{gl['value']}", 'is_exceedance_sum': f"Anz>={gl['value']}", 'pct_exceedances_':'pct_exceedances'} )
+            df = df[['Jahr', f"Anz<{gl['value']}", f"Anz>={gl['value']}",'pct_exceedances']]
+            return df
+
+        def analyse_hour():
+            df = self.df_data[['jahr', par['name_short']]]
+            df['exceedance'] = df[par['name_short']] - gl['value']
+            df['is_exceedance'] = df['exceedance'].apply(lambda val: 1 if val > 0 else 0)
+            df['no_exceedance'] = abs(df['is_exceedance'] - 1)
+            
+            df = df.groupby(['jahr'])['exceedance','no_exceedance','is_exceedance',].agg(['sum']).reset_index()
+            df['pct_exceedances'] = df['is_exceedance'] / (df['no_exceedance'] + df['is_exceedance']) * 100
+            df.columns = df.columns.map('_'.join)
+            df = df.rename(columns={'jahr_':'Jahr', 'no_exceedance_sum': f"Anz<{gl['value']}", 'is_exceedance_sum': f"Anz>={gl['value']}", 'pct_exceedances_':'pct_exceedances'} )
+            df = df[['Jahr', f"Anz<{gl['value']}", f"Anz>={gl['value']}",'pct_exceedances']]
+            return df
+
         st.markdown(f"### Grenzwert: {gl['legend']} für {par['name_long']}: {gl['value']}")
         st.markdown(gl['comment'])
         st.markdown('Grenzwert-Überschreitungen')
-        df = self.df_data.groupby(['jahr'])[par['name_short']].agg(['mean', 'count']).reset_index()
-        df = df[df['jahr'].isin(self.get_jahre_mit_monatlichen_daten(self.df_data, par['name_short']))]
-        df['exceedance'] = df['mean'] - gl['value']
-        df = df.rename(columns={'jahr':'Jahr', 'mean': 'Mittelwert', 'count': 'Anzahl Messungen', 'exceedance': 'Abweichung vom Grenzwert'} )
+
+        if gl['time_agg_field'] == 'jahr':
+            df = analyse_year()
+        elif gl['time_agg_field'] == 'datum':
+            df = analyse_day()
+        elif gl['time_agg_field'] == 'stunde':
+            df = analyse_hour()
         AgGrid(df)
         st.markdown(f"Überschreitungen des Jahresgrenzwerts werden nur in Jahren ausgewiesen, in welchen während mindestestens {min_number_months_measured} Monaten gemessen wurde")
+        
 
     def show_exceedance(self):
         for par in self.parameters:

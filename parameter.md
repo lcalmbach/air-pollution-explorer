@@ -35,5 +35,3 @@ Die Massnahmen des Bundes zur Reduktion des Sommersmogs konzentrieren sich auf d
 | PM10 |50µg/m3 | 24 Stunden Grenzwert, darf 3 mal pro Jahr überschritten werden |
 | Ozone |100µg/m3 | 98% der Halbstunden-Mittelwerte sind kleiner als 100µg/m3 |
 | Ozone |120µg/m3 | Stündlicher Mittelwert darf einmal pro Jahr überschritten werden |
-### Stationen
-{}
