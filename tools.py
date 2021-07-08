@@ -10,7 +10,6 @@ import pandas as pd
 import numpy as np
 import base64
 from datetime import datetime
-
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
 
 
@@ -231,3 +230,44 @@ def add_time_columns(df):
     df['jahr'] = df['zeit'].dt.year    
     df['monat'] = df['zeit'].dt.month  
     return df
+
+
+def get_table_settings(df:pd.DataFrame):
+    row_height = 40
+    max_height = 400
+
+    if len(df) > 0:
+        height = (len(df) + 1) * row_height
+        
+        if height > max_height:
+            height = max_height
+        return {"width":"50%",'height':height }
+    else:
+        return {}
+
+def show_table(df: pd.DataFrame, cols, settings):
+    gb = GridOptionsBuilder.from_dataframe(df)
+    #customize gridOptions
+    gb.configure_default_column(groupable=False, value=True, enableRowGroup=False, aggFunc='sum', editable=False)
+    for col in cols:
+        gb.configure_column(col['name'], type=col['type'], precision=col['precision'])
+
+    gb.configure_grid_options(domLayout='normal')
+    gridOptions = gb.build()
+
+    grid_response = AgGrid(
+        df, 
+        gridOptions=gridOptions,
+        height=settings['height'], 
+        width=settings['width'], 
+        data_return_mode=DataReturnMode.FILTERED_AND_SORTED, 
+        update_mode=GridUpdateMode.VALUE_CHANGED,
+        fit_columns_on_grid_load=False,
+        allow_unsafe_jscode=False, 
+        enable_enterprise_modules=False,
+        )
+
+    df = grid_response['data']
+    selected = grid_response['selected_rows']
+    selected_df = pd.DataFrame(selected)
+    return selected_df
