@@ -18,10 +18,10 @@ import config
 __version__ = '0.0.1' 
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
-VERSION_DATE = '2021-06-12'
+VERSION_DATE = '2021-07-08'
 my_name = '🌎Luft-Qualität-Explorer.BS'
-my_kuerzel = "apox"
-GIT_REPO = 'https://github.com/lcalmbach/air-pol-ex'
+my_kuerzel = "lqx.bs"
+GIT_REPO = 'https://github.com/lcalmbach/air-pollution-explorer'
 
 APP_INFO = f"""<div style="background-color:powderblue; padding: 10px;border-radius: 15px;">
     <small>App created by <a href="mailto:{__author_email__}">{__author__}</a><br>
@@ -147,6 +147,7 @@ def main():
     df_data, df_stations, df_parameters = get_data()
     app = app.App(df_data, df_stations, df_parameters)
     app.show_menu()
+    st.sidebar.markdown(APP_INFO, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
