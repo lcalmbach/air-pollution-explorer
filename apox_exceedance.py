@@ -128,9 +128,9 @@ class App:
             def get_cols():
                 cols = []
                 cols.append({'name':'Jahr', 'type':["numericColumn","numberColumnFilter","customNumericFormat"], 'precision':0})
-                cols.append({'name':f"Anz<{gl['value']}", 'type':["numericColumn","numberColumnFilter","customNumericFormat"], 'precision':1})
+                cols.append({'name':f"Anz<{gl['value']}", 'type':["numericColumn","numberColumnFilter","customNumericFormat"], 'precision':0})
                 cols.append({'name':f"Anz>={gl['value']}", 'type':["numericColumn","numberColumnFilter","customNumericFormat"], 'precision':0})
-                cols.append({'name':'Abweichung vom Grenzwert', 'type':["numericColumn","numberColumnFilter","customNumericFormat"], 'precision':1})
+                cols.append({'name':'Überschreitungen(%)', 'type':["numericColumn","numberColumnFilter","customNumericFormat"], 'precision':1})
                 return cols
 
             df = df[['jahr', par['name_short']]]

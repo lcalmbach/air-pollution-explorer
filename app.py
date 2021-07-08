@@ -53,13 +53,13 @@ def get_data():
 
     def data_is_up_to_date(df):
         """
-        Verifies whether now() is not more than 1 hours ahead of the most recent record 
+        Verifies whether now() is not more than 2 hours ahead of the most recent record 
         in the local data table.
         """
         
         most_recent_record = get_most_recent_record(df)
         diff = datetime.now(tz=config.tz_GMT) - most_recent_record
-        result = (diff < timedelta(hours = 1))
+        result = (diff < timedelta(hours = 2))
         logging.info(f'timediff is {diff}, data_is_up_to_date = {result}')
         return 
     
@@ -104,7 +104,7 @@ def get_data():
                     , inplace=True)
                 df_ogd = df_ogd[['zeit','PM10','PM2.5','O3']]
                 df_ogd['zeit'] = pd.to_datetime(df_ogd['zeit'])
-                #make sure there are no duplicate records
+                # make sure there are no duplicate records
                 df_ogd = df_ogd[df_ogd['zeit'] > get_most_recent_record(df)]
                 # add station id, todo: make this flexible 
                 df_ogd['station'] = 1 
@@ -119,9 +119,9 @@ def get_data():
             df = df.append(df_ogd)
             try:
                 df.to_parquet('./data/apox_data.pq')
-                logging.info(f'Most recent data was added to apox_data.pq file')
+                logging.info(f'die neusten Daten wurden in apox_data.pq gespeichert')
             except:
-                st.warning('Aktuellste Daten konnten nicht gespeichert werden')
+                st.warning('De neusten Daten konnten nicht gespeichert werden')
         # now add data
         return df 
     
