@@ -72,7 +72,6 @@ class App:
                 f" die Werte sind nach {self.settings['agg_time']} aggregiert. Jede Box zeigt die Verteilung von 50% der Daten (25. - 75. Perzentil). Die Ausgezogenen Linien repräsentieren "\
                 "1.5 * die Standardabweichung, was zirka 95% der Werte in der Verteilung entspricht. Alle Werte, die kleiner als 1.5 x die Standardabweichung oder grösser als 1.5 x die Standardabweichung sind, "\
                 " u +- 1.5 Std entspricht in eienr Normalveretilung rung 87% der Werte. Werte die ausserhalb dieses Intervall fallen, werden als Extremwerte bezeichnet und sind als individuelle Symbole (Kreise) geplottet."
-
             return text 
         
         
@@ -117,6 +116,7 @@ class App:
         st.markdown(get_text(df))
         with st.beta_expander('Data'):
             AgGrid(df)
+            st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
 
 
     def show_linechart(self):  
@@ -222,6 +222,7 @@ class App:
         st.markdown(get_text(df))
         with st.beta_expander('Data'):
             AgGrid(df)
+            st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
 
 
     def show_barchart(self):
@@ -307,6 +308,7 @@ class App:
         # st.markdown(get_text(df))
         with st.beta_expander('Data'):
             AgGrid(df)
+            st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
 
 
     def show_heatmap(self):
@@ -363,6 +365,7 @@ class App:
         show_plot()
         with st.beta_expander('Data'):
             AgGrid(df)
+            st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
 
 
     def show_menu(self):

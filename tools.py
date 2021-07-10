@@ -111,8 +111,7 @@ def get_table_download_link(df: pd.DataFrame) -> str:
 
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
-    href = f'<a href="data:file/csv;base64,{b64}">Download csv file</a>'
-
+    href = f'<a href="data:file/csv;base64,{b64}">im csv Format herunterladen</a>'
     return href
 
 
@@ -146,66 +145,6 @@ def dic2html_table(dic: dict, key_col_width_pct: int)-> str:
         html_table += f'<tr><td style="width: {key_col_width_pct}%;">{x}</td><td>{dic[x]}</td>'
     html_table += '</table>'
     return html_table
-
-def show_grid(df:pd.DataFrame, title, col_cfg:dict={}):
-    #Infer basic colDefs from dataframe types
-    gb = GridOptionsBuilder.from_dataframe(df)
-
-    #customize gridOptions
-    
-    gb.configure_default_column(groupable=False, value=True, enableRowGroup=False, editable=True)
-
-    if col_cfg != None:
-        for col in col_cfg:
-            gb.configure_column(col['name'], type=col['type'], custom_format_string=col['custom_format_string'])
-            col['type']=["dateColumnFilter","customDateTimeFormat"]
-            col['precision']=2
-            col['custom_format_string'] = 'yyyy-MM-dd HH:mm zzz'
-    #gb.configure_column("apple", type=["numericColumn","numberColumnFilter","customNumericFormat"], precision=2, aggFunc='sum')
-    #gb.configure_column("banana", type=["numericColumn", "numberColumnFilter", "customNumericFormat"], precision=1, aggFunc='avg')
-    #gb.configure_column("chocolate", type=["numericColumn", "numberColumnFilter", "customCurrencyFormat"], custom_currency_symbol="CHF ", aggFunc='max')
-
-    #configures last row to use custom styles based on cell's value, injecting JsCode on components front end
-    
-    if grd_cfg['enable_sidebar']:
-        gb.configure_side_bar()
-
-    if grd_cfg['enable_selection']:
-        gb.configure_selection(grd_cfg['selection_mode'])
-        if grd_cfg['use_checkbox']:
-            gb.configure_selection(grd_cfg['selection_mode'], use_checkbox=True, groupSelectsChildren=grd_cfg['groupSelectsChildren'], groupSelectsFiltered=grd_cfg['groupSelectsFiltered'])
-        if ((grd_cfg['selection_mode'] == 'multiple') & (not grd_cfg['use_checkbox'])):
-            gb.configure_selection(grd_cfg['selection_mode'], use_checkbox=False, rowMultiSelectWithClick=grd_cfg['rowMultiSelectWithClic'], suppressRowDeselection=grd_cfg['suppressRowDeselection'])
-
-    if grd_cfg['enable_pagination']:
-        if grd_cfg['paginationAutoSize']:
-            gb.configure_pagination(paginationAutoPageSize=True)
-        else:
-            gb.configure_pagination(paginationAutoPageSize=False, paginationPageSize=grd_cfg['paginationPageSize'])
-
-    gb.configure_grid_options(domLayout='normal')
-    gridOptions = gb.build()
-
-    #Display the grid
-    with st.spinner("Loading Grid..."):
-        st.header(title)
-        grid_response = AgGrid(
-            df, 
-            gridOptions=gridOptions,
-            height=grd_cfg['grid_height'], 
-            width='100%',
-            data_return_mode=grd_cfg['return_mode_value'], 
-            update_mode=grd_cfg['update_mode_value'],
-            fit_columns_on_grid_load=grd_cfg['fit_columns_on_grid_load'],
-            allow_unsafe_jscode=True, #Set it to True to allow jsfunction to be injected
-            enable_enterprise_modules=grd_cfg['enable_enterprise_modules'],
-            )
-    
-    df_result = grid_response['data']
-    selected = grid_response['selected_rows']
-    
-    sel_id = selected[0]['id'] if len(selected)>0 else -999
-    return df_result, sel_id
 
 def left(s, amount):
     return s[:amount]
@@ -271,3 +210,11 @@ def show_table(df: pd.DataFrame, cols, settings):
     selected = grid_response['selected_rows']
     selected_df = pd.DataFrame(selected)
     return selected_df
+
+
+def get_base64_encoded_image(image_path):
+    """
+    returns bytecode for an image file
+    """
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode('utf-8')

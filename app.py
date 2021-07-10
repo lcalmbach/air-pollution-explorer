@@ -14,11 +14,12 @@ import apox_exceedance
 import config as cn
 from datetime import datetime, timedelta
 import config
+import tools
 
-__version__ = '0.0.1' 
+__version__ = '0.0.2' 
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
-VERSION_DATE = '2021-07-08'
+VERSION_DATE = '2021-07-09'
 my_name = '🌎Luft-Qualität-Explorer.BS'
 my_kuerzel = "lqx.bs"
 GIT_REPO = 'https://github.com/lcalmbach/air-pollution-explorer'
@@ -147,6 +148,12 @@ def main():
     df_data, df_stations, df_parameters = get_data()
     app = app.App(df_data, df_stations, df_parameters)
     app.show_menu()
+    header_html = "<a href = 'https://www.tutorialspoint.com' target = '_blank'><img src='data:image/png;base64,{}' class='img-fluid' style='width:45px;height:45px;'></a><br>".format(
+    tools.get_base64_encoded_image("./images/help2.jpg")
+    )
+    st.sidebar.markdown(
+        header_html, unsafe_allow_html=True,
+    )
     st.sidebar.markdown(APP_INFO, unsafe_allow_html=True)
 
 

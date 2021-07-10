@@ -77,6 +77,7 @@ class App:
             st.markdown(f'**{par}**')
             _stats = _df.groupby(['datum'])[par].agg(['min','max','mean', 'std', 'count', percentile(5), percentile(25), percentile(50), percentile(75), percentile(90), percentile(95), percentile(99)]).reset_index()
             tools.show_table(_stats, self.get_cols(), tools.get_table_settings(_stats))
+            st.markdown(tools.get_table_download_link(_stats),unsafe_allow_html=True)
 
 
     def show_monthly_stats(self):
@@ -90,6 +91,7 @@ class App:
             st.markdown(f'**{par}**')
             _stats = _df.groupby(['jahr', 'monat'])[par].agg(['min','max','mean', 'std', 'count', tools.percentile(5), tools.percentile(25), tools.percentile(50), tools.percentile(75), tools.percentile(90), tools.percentile(95), tools.percentile(99)]).reset_index()
             tools.show_table(_stats, self.get_cols(), tools.get_table_settings(_stats))
+            st.markdown(tools.get_table_download_link(_stats),unsafe_allow_html=True)
 
     def show_yearly_stats(self):
         jahre = st.sidebar.slider('Jahr', self.start_jahr, self.end_jahr, (self.start_jahr, self.end_jahr))
@@ -100,6 +102,7 @@ class App:
             st.markdown(f'**{par}**')
             _stats = _df.groupby(['jahr'])[par].agg(['min','max','mean', 'std', 'count', tools.percentile(5), tools.percentile(25), tools.percentile(50), tools.percentile(75), tools.percentile(90), tools.percentile(95), tools.percentile(99)]).reset_index()
             tools.show_table(_stats, self.get_cols(), tools.get_table_settings(_stats))
+            st.markdown(tools.get_table_download_link(_stats),unsafe_allow_html=True)
 
     def show_menu(self):
         _station_id = st.sidebar.selectbox('Station', list(self.dic_stations.keys()),
