@@ -88,7 +88,7 @@ def get_data():
             """
             converts the json string into a dataframe with only the required columns
             """
-            logging.info(f'Extracting data from jason string')
+            logging.info(f'Extracting data from json string')
             data = data['records']
             try:
                 df_ogd = pd.DataFrame(data)['fields']
@@ -148,7 +148,7 @@ def main():
     df_data, df_stations, df_parameters = get_data()
     app = app.App(df_data, df_stations, df_parameters)
     app.show_menu()
-    header_html = "<a href = 'https://www.tutorialspoint.com' target = '_blank'><img src='data:image/png;base64,{}' class='img-fluid' style='width:45px;height:45px;'></a><br>".format(
+    header_html = "<a href = 'https://lcalmbach.github.io/lqx-help/' target = '_blank'><img src='data:image/png;base64,{}' class='img-fluid' style='width:45px;height:45px;'></a><br>".format(
     tools.get_base64_encoded_image("./images/help2.jpg")
     )
     st.sidebar.markdown(

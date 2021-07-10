@@ -66,70 +66,74 @@ class App:
     
 
     def show_boxplot(self):  
-        def get_text(df):
+        def get_text(df, par):
             
-            text = f"Diese Figur zeigt Zeitreihe von {self.settings['par']} von {self.settings['date_from'].strftime('%d.%m.%Y')} bis {self.settings['date_to'].strftime('%d.%m.%Y')}. "\
+            text = f"Diese Figur zeigt Zeitreihe von {par} von {self.settings['years'][0]} bis {self.settings['years'][1]}. "\
                 f" die Werte sind nach {self.settings['agg_time']} aggregiert. Jede Box zeigt die Verteilung von 50% der Daten (25. - 75. Perzentil). Die Ausgezogenen Linien repräsentieren "\
                 "1.5 * die Standardabweichung, was zirka 95% der Werte in der Verteilung entspricht. Alle Werte, die kleiner als 1.5 x die Standardabweichung oder grösser als 1.5 x die Standardabweichung sind, "\
-                " u +- 1.5 Std entspricht in eienr Normalveretilung rung 87% der Werte. Werte die ausserhalb dieses Intervall fallen, werden als Extremwerte bezeichnet und sind als individuelle Symbole (Kreise) geplottet."
+                " u +- 1.5 Std entspricht in einer Normalveretilung rung 87% der Werte. Werte die ausserhalb dieses Intervall fallen, werden als Extremwerte bezeichnet und sind als individuelle Symbole (Kreise) geplottet."
             return text 
         
         
         def get_settings():
             self.settings['agg_time'] = st.sidebar.selectbox("Aggregiere Messungen nach",options=['Jahr','Monat','Woche','Tag'])
-            self.settings['par'] = st.sidebar.selectbox("Parameter", options=self.lst_parameters)
-            self.settings['date_from'] = st.sidebar.date_input('Von Datum',min_value=datetime(2003,1,1), max_value=datetime.now(),value=datetime(2003,1,1))
-            self.settings['date_to'] = st.sidebar.date_input('Bis Datum',min_value=datetime(2003,1,1), max_value=datetime.now(),value=datetime.now())
+            self.settings['parameters'] = st.sidebar.multiselect("Parameters",options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
+            self.settings['years'] = st.sidebar.slider('🔍Jahr', self.start_jahr, self.end_jahr, (self.start_jahr, self.end_jahr))
+            if self.settings['agg_time'] == 'Monat-Stunde':
+                self.settings['monat'] = st.sidebar.selectbox("Parameter",options=list(config.MONTHS_DICT.values()))
+            self.settings['show_guidelines'] = st.sidebar.checkbox('Zeige Grenzwerte', True)
 
         
-        def aggregate_data(df,):   
+        def aggregate_data(df,par):   
             dict_agg_variable = {
                 'Jahr': 'mitte_jahr',
                 'Monat':'mitte_monat',
                 'Woche':'mitte_woche',
                 'Tag': 'datum',
                 'Stunde': 'zeit'}
+            
+            par_title = par.replace('.','')  # remove dot, as it cannot be displayed in aggrid 
             t_agg =   dict_agg_variable[self.settings['agg_time']]       
-            df = df[[self.settings['par']] + [t_agg]]
-            df = df.rename(columns={self.settings['par']: self.settings['par'].replace('.','')})
+            df = df[[par] + [t_agg]]
+            df = df.rename(columns={par: par_title})
+            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {dict_titles[self.settings['agg_time']]}"
             self.settings['tooltip'] = list(df.columns)
             self.settings['x'] = alt.X(f"{t_agg}:T", 
                 axis=alt.Axis(title=''))
-            self.settings['y'] = alt.Y(f"{self.settings['par'].replace('.','')}:Q", 
-                axis=alt.Axis(title='Konzentration in ug/m3'))
-            
+            self.settings['y'] = alt.Y(f"{par_title}:Q")
             return df
 
         def show_plot(df):
             chart = alt.Chart(df).mark_boxplot().encode(  
-            x=self.settings['x'],
-            y=self.settings['y'],
-            tooltip = self.settings['tooltip']
-            ).properties(width=plot_width, height=plot_height)
+                        x=self.settings['x'],
+                        y=self.settings['y'],
+                        tooltip = self.settings['tooltip']
+                    ).properties(width=plot_width, height=plot_height, title=self.settings['plot_title'])
             
             st.altair_chart(chart)
         
         get_settings()
-        df = self.filter_data()
-        df = aggregate_data(df)
-        show_plot(df)
-        st.markdown(get_text(df))
-        with st.beta_expander('Data'):
-            AgGrid(df)
-            st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
+        dict_titles = {'Jahr':'Jahresmittelwerte', 
+            'Monat':f"Monats-Mittelwerte ({self.settings['years'][0]} bis {self.settings['years'][1]})",
+            'Woche':f"Wochen-Mittelwerte ({self.settings['years'][0]} bis {self.settings['years'][1]})",
+            'Tag': f"Tagesmittelwerte ({self.settings['years'][0]} bis {self.settings['years'][1]})",
+            'Stunde': 'Stunden-Mittelwerte',
+            'Jahr-Monat':'Monatsmittelwerte nach Jahr',
+            'Jahr-Woche':'Wochenmittelwerte nach Jahr'
+        }
+
+        for par in self.settings['parameters']:
+            df = self.filter_data()
+            df = aggregate_data(df,par)
+            show_plot(df)
+            st.markdown(get_text(df, par))
+            with st.beta_expander('Data'):
+                AgGrid(df)
+                st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
 
 
     def show_linechart(self):  
-        def get_text(df):
-            def get_parameters():
-                if len(self.settings['par'])==1:
-                    result = self.settings['par'][0]
-                elif len(self.settings['par'])==2:
-                    result = f"{self.settings['par'][0] } und {self.settings['par'][0] }"
-                elif len(self.settings['par'])>2:
-                    result = ", ".join(self.settings['par'][:-1]) + ' und ' + self.settings['par'][-1]
-                return result
-
+        def get_text(df, par):
             def band_expr():
                 if self.settings['show_band']:
                     return ' Die leicht durchsichtige Fläche zeigt die Fläche, welche 90% der Werte beinhaltet (von 5% zu 95% Perzentil).'
@@ -143,15 +147,15 @@ class App:
                 else:
                     return ''
 
-            text = f"Diese Figur zeigt Zeitreihe von {get_parameters()} von {self.settings['date_from'].strftime('%d.%m.%Y')} bis {self.settings['date_to'].strftime('%d.%m.%Y')}. "\
+            text = f"Diese Figur zeigt Zeitreihe von {par} von {self.settings['date_from'].strftime('%d.%m.%Y')} bis {self.settings['date_to'].strftime('%d.%m.%Y')}. "\
                 f"Die Messwerte wurden zu einem Wert pro {self.settings['agg_time']} aggregiert. Diese Werte werden durch die durchgezogene Linie dargestellt.{band_expr()}{mov_avg()}"
             return text 
         
         
         def get_settings():
             self.settings['agg_time'] = st.sidebar.selectbox("Aggregiere Messungen nach",options=['Monat','Woche','Tag','Stunde'])
-            self.settings['par'] = st.sidebar.multiselect("Parameter", options=self.lst_parameters,default=['PM2.5'])
-            self.settings['date_from'] = st.sidebar.date_input('Von Datum',min_value=datetime(2003,1,1), max_value=datetime.now(), value=datetime.now()-timedelta(30))
+            self.settings['parameters'] = st.sidebar.multiselect("Parameters",options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
+            self.settings['date_from'] = st.sidebar.date_input('Von Datum',min_value=datetime(2003,1,1), max_value=datetime.now(), value=datetime.now()-timedelta(365))
             self.settings['date_to'] = st.sidebar.date_input('Bis Datum',min_value=datetime(2003,1,1), max_value=datetime.now(), value=datetime.now())
             #if self.settings['agg_time'] in ('Tag','Stunde'):
             #    self.settings['monat'] = st.sidebar.selectbox("Monat",options=list(config.MONTHS_DICT.values()))
@@ -159,17 +163,18 @@ class App:
             self.settings['mov_average_frame'] = st.sidebar.number_input("Zeige gleitendes Mittel (0 für nicht Anzeigen)", min_value=0, max_value=int(366/2))
         
 
-        def aggregate_data(df,):   
+        def aggregate_data(df,par):   
+            par_title = par.replace('.','')  # remove dot, as it cannot be displayed in aggrid 
             t_agg =   dict_agg_variable[self.settings['agg_time']]       
-            df = df[self.settings['par'] + [t_agg]]
-            df = df.melt(id_vars=[t_agg], value_vars=self.settings['par'])
+            df = df[[par] + [t_agg]]
+            df = df.melt(id_vars=[t_agg], value_vars=par)
             df = df.groupby([t_agg, 'variable'])['value'].agg(['mean', tools.percentile(5), tools.percentile(95)]).reset_index()
-    
+            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {dict_titles[self.settings['agg_time']]}"
             self.settings['tooltip'] = list(df.columns)
             self.settings['x'] = alt.X(f"{t_agg}:T", 
                 axis=alt.Axis(title=''))
             self.settings['y'] = alt.Y("mean:Q", 
-                axis=alt.Axis(title='Konzentration in ug/m3'))
+                axis=alt.Axis(title='Konzentration in µg/m3'))
             self.settings['y_par'] = "mean"
             self.settings['color'] = alt.Color("variable:N")
             
@@ -181,7 +186,7 @@ class App:
             y=self.settings['y'],
             color=self.settings['color'],
             tooltip = self.settings['tooltip']
-            ).properties(width=plot_width, height=plot_height)
+            ).properties(width=plot_width,height=plot_height,title=self.settings['plot_title'])
             
             if self.settings['show_band']:
                 band = alt.Chart(df).mark_area(
@@ -216,13 +221,20 @@ class App:
             'Tag': 'datum',
             'Stunde': 'zeit'}
         get_settings()
-        df = self.filter_data()
-        df = aggregate_data(df)
-        show_plot(df)
-        st.markdown(get_text(df))
-        with st.beta_expander('Data'):
-            AgGrid(df)
-            st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
+        dict_titles = {'Jahr':'Jahresmittelwerte', 
+            'Monat':f"Monats-Mittelwerte ({self.settings['date_from']} bis {self.settings['date_to']})",
+            'Woche':f"Wochen-Mittelwerte ({self.settings['date_from']} bis {self.settings['date_to']})",
+            'Tag': f"Tagesmittelwerte ({self.settings['date_from']} bis {self.settings['date_to']})",
+            'Stunde': 'Stunden-Mittelwerte'
+        }
+        for par in self.settings['parameters']:
+            df = self.filter_data()
+            df = aggregate_data(df, par)
+            show_plot(df)
+            st.markdown(get_text(df,par))
+            with st.beta_expander('Data'):
+                AgGrid(df)
+                st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
 
 
     def show_barchart(self):
@@ -238,19 +250,21 @@ class App:
 
         def get_settings():
             self.settings['agg_time'] = st.sidebar.selectbox("Aggregiere Messungen nach",options=list(dict_agg_variable.keys()))
-            self.settings['par'] = st.sidebar.selectbox("Parameter",options=self.lst_parameters)
+            self.settings['parameters'] = st.sidebar.multiselect("Parameters",options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
             self.settings['years'] = st.sidebar.slider('🔍Jahr', self.start_jahr, self.end_jahr, (self.start_jahr, self.end_jahr))
             if self.settings['agg_time'] == 'Monat-Stunde':
                 self.settings['monat'] = st.sidebar.selectbox("Parameter",options=list(config.MONTHS_DICT.values()))
             self.settings['show_guidelines'] = st.sidebar.checkbox('Zeige Grenzwerte', True)
 
-        def aggregate_data(df):
-            par = self.settings['par'].replace('.','')
+        def aggregate_data(df, par):
+            par_title = par.replace('.','')  # remove dot, as it cannot be displayed in aggrid 
             t_agg = dict_agg_variable[self.settings['agg_time']]
-            df = df.groupby([t_agg])[self.settings['par']].agg(['mean'])
-            df = df.rename(columns = {'mean': self.settings['par'].replace('.','')})
+            df = df.groupby([t_agg])[par].agg(['mean'])
+            
+            df = df.rename(columns = {'mean': par_title})
+            
             df = df.reset_index()
-            self.settings['plot_title'] = f"{self.settings['par']} an Station {self.station['name']}: {dict_titles[self.settings['agg_time']]}"
+            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {dict_titles[self.settings['agg_time']]}"
             self.settings['bar_width'] = plot_width / 2 / len(df) 
             self.settings['tooltip'] =list(df.columns)
             if t_agg in ['jahr','monat','woche']:
@@ -259,17 +273,17 @@ class App:
             else:
                 self.settings['x'] = alt.X(f"{t_agg}:T", 
                     axis=alt.Axis(title='', format="%b %Y"))
-            self.settings['y'] = alt.Y(f"{par}:Q", 
+            self.settings['y'] = alt.Y(f"{par_title}:Q", 
                 axis=alt.Axis(title='Konzentration in µg/m3'))
             self.settings['y_par'] = par
                 #self.settings['x_scale'] = (1,23)
-            
             return df
 
-        def show_plot(df):
+        def show_plot(df, par):
             if self.settings['show_guidelines']:
                 lines = []
-                guidelines = self.df_parameters[self.settings['par']]['guidelines']
+                guidelines = self.df_parameters[par]['guidelines']
+
                 for gl in guidelines:
                     df[gl['legend']] = gl['value']
                     line = alt.Chart(df).mark_rule(color=gl['color']).encode(y=gl['legend'], tooltip=gl['legend'])
@@ -280,6 +294,7 @@ class App:
                 y=self.settings['y'], 
                 tooltip = self.settings['tooltip']
             ).properties(width=plot_width,height=plot_height,title=self.settings['plot_title'])
+            
             if self.settings['show_guidelines']:
                 for line in lines:
                     chart += line
@@ -302,36 +317,37 @@ class App:
             'Jahr-Woche':'Wochenmittelwerte nach Jahr'
         }
 
-        df = self.filter_data()
-        df = aggregate_data(df)
-        show_plot(df)
-        # st.markdown(get_text(df))
-        with st.beta_expander('Data'):
-            AgGrid(df)
-            st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
+        for par in self.settings['parameters']:
+            df = self.filter_data()
+            df = aggregate_data(df, par)
+            show_plot(df, par)
+            # st.markdown(get_text(df))
+            with st.beta_expander('Data'):
+                AgGrid(df)
+                st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
 
 
     def show_heatmap(self):
         def get_settings():
             self.settings['agg_time'] = st.sidebar.selectbox("Aggregiere Messungen nach",options=['Monat','Tag','Stunde'])
-            self.settings['par'] = st.sidebar.selectbox("Parameter",options=self.lst_parameters)
+            self.settings['parameters'] = st.sidebar.multiselect("Parameters",options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
             self.settings['years'] = st.sidebar.slider('🔍Jahr', self.start_jahr, self.end_jahr, (self.start_jahr, self.end_jahr))
             if self.settings['agg_time'] in ('Tag','Stunde'):
                 self.settings['monat'] = st.sidebar.selectbox("Parameter",options=list(config.MONTHS_DICT.values()))
 
-        def aggregate_data(df,):   
+        def aggregate_data(df,par):   
+            par_title = par.replace('.','')  # remove dot, as it cannot be displayed in aggrid 
             df['monat'] = df['monat'].replace(config.MONTHS_DICT)
             t_agg = dict_agg_variable[self.settings['agg_time']]
-            # df = df[[self.settings['par'], 'jahr', 'monat'] + [t_agg]]
-            df = df.groupby(t_agg['group_by'])[self.settings['par']].agg(['mean'])
-            df = df.rename(columns={'mean': self.settings['par'].replace('.','')}).reset_index()
+            df = df.groupby(t_agg['group_by'])[par].agg(['mean'])
+            df = df.rename(columns={'mean': par_title}).reset_index()
+            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {dict_titles[self.settings['agg_time']]}"
             self.settings['tooltip'] = list(df.columns)
             self.settings['x'] = alt.X(t_agg['x'], 
                 axis=alt.Axis(title=t_agg['x_title']))
             self.settings['y'] = alt.Y(t_agg['y'], 
                 axis=alt.Axis(title=t_agg['y_title']))
-            #self.settings['y_par'] = self.settings['par'].replace('.','')
-            self.settings['color'] = alt.Color(f"{self.settings['par'].replace('.','')}:Q")
+            self.settings['color'] = alt.Color(f"{par_title}:Q")
             return df
 
         
@@ -341,8 +357,7 @@ class App:
             y=self.settings['y'],
             color=self.settings['color'],
             tooltip = self.settings['tooltip']
-            ).properties(width=plot_width, height=plot_height*1.5)
-            
+            ).properties(width=plot_width, height=plot_height*1.5, title=self.settings['plot_title'])
             st.altair_chart(chart)
 
         
@@ -360,12 +375,14 @@ class App:
             'Jahr-Monat':'Monatsmittelwerte nach Jahr',
             'Jahr-Woche':'Wochenmittelwerte nach Jahr'
         }
-        df = self.filter_data()
-        df = aggregate_data(df)
-        show_plot()
-        with st.beta_expander('Data'):
-            AgGrid(df)
-            st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
+
+        for par in self.settings['parameters']:
+            df = self.filter_data()
+            df = aggregate_data(df, par)
+            show_plot()
+            with st.beta_expander('Data'):
+                AgGrid(df)
+                st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
 
 
     def show_menu(self):
@@ -375,7 +392,6 @@ class App:
         _station_id = st.sidebar.selectbox('Station', list(self.dic_stations.keys()),
                 format_func=lambda x: self.dic_stations[x])    
         self.station = self.df_stations.loc[_station_id]
-        
         if plot_type == 'Säulendiagramm':
             self.show_barchart()
         elif plot_type == 'Liniendiagramm':
