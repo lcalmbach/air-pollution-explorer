@@ -17,8 +17,8 @@ class App:
     
     def show_about(self):
         stations = len(self.df_stations)
-        year_from = self.df_data['zeit'].min().strftime('%Y')
-        year_to = self.df_data['zeit'].max().strftime('%Y')
+        year_from = self.df_data['jahr'].min()
+        year_to = self.df_data['jahr'].max()
         most_current_record = self.df_data['zeit'].max().strftime('%d.%m.%Y %H:%M')
         now_as_CET = datetime.now(tz=config.tz_GMT).strftime('%d.%m.%Y %H:%M')
         with open('./intro.md', encoding='UTF8') as f:

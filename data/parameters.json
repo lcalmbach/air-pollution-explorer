@@ -1,31 +1,31 @@
 {
     "PM2.5": 
         {"name_short": "PM2.5", 
-        "unit": "ug/m3",
+        "unit": "µg/m3",
         "name_long": "Feinstaub (PM2.5)",
         "description":"./feinstaub.md",
         "guidelines":[
-            {"name": "jahresmittel","time_agg_field": "jahr","max_exceedances":0,"unit_max_exceedances":"num","value":10,"legend":"Jahresmittel","comment":"Jahresgrenzwert", "color":"red"}
+            {"name": "jahresmittel","time_agg_field": "jahr","max_exceedances":0,"unit_max_exceedances":"num","value":10,"legend":"Grenzwert Jahresmittel","comment":"Jahresgrenzwert", "color":"red"}
         ]
     },
     "PM10": 
         {"name_short": "PM10", 
-        "unit": "ug/m3",
+        "unit": "µg/m3",
         "name_long": "Feinstaub (PM10)",
         "description":"./feinstaub.md",
         "guidelines":[
-            {"name": "jahresmittel","time_agg_field": "jahr","max_exceedances":1,"unit_max_exceedances":"num","value":20,"legend":"Jahresmittel","comment":"Jahresgrenzwert", "color":"red"},
-            {"name": "tagesmittel","time_agg_field": "datum","max_exceedances":3,"unit_max_exceedances":"num","value":50,"legend":"Tagesmittel","comment":"24 Stunden Grenzwert, darf 3 mal pro Jahr überschritten werden", "color":"orange"}
+            {"name": "jahresmittel","time_agg_field": "jahr","max_exceedances":1,"unit_max_exceedances":"num","value":20,"legend":"Grenzwert Jahresmittel","comment":"Jahresgrenzwert", "color":"red"},
+            {"name": "tagesmittel","time_agg_field": "datum","max_exceedances":3,"unit_max_exceedances":"num","value":50,"legend":"Grenzwert Tagesmittel","comment":"24 Stunden Grenzwert, darf 3 mal pro Jahr überschritten werden", "color":"orange"}
         ]
     },
     "O3": 
         {"name_short": "O3", 
-        "unit": "ug/m3",
+        "unit": "µg/m3",
         "name_long": "Ozon",
         "description":"./O3.md",
         "guidelines":[
-            {"name": "jahr", "time_agg_field": "jahr","max_exceedances":1,"unit_max_exceedances":"%","value":100,"legend":"Jahresmittel","comment":"98% der Halbstunden-Mittelwerte sind kleiner als 100µg/m3", "color":"red"},
-            {"name": "stunde", "time_agg_field": "stunde","max_exceedances":1,"unit_max_exceedances":"num","value":120,"legend":"Stundenmittel","comment":"Stündlicher Mittelwert darf einmal pro Jahr überschritten werden", "color":"orange"}
+            {"name": "jahr", "time_agg_field": "jahr","max_exceedances":1,"unit_max_exceedances":"%","value":100,"legend":"Grenzwert Jahresmittel","comment":"98% der Halbstunden-Mittelwerte sind kleiner als 100µg/m3", "color":"red"},
+            {"name": "stunde", "time_agg_field": "stunde","max_exceedances":1,"unit_max_exceedances":"num","value":120,"legend":"Grenzwert Stundenmittel","comment":"Stündlicher Mittelwert darf einmal pro Jahr überschritten werden", "color":"orange"}
         ]
     }
 }

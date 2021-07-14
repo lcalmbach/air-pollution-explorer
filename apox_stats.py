@@ -15,17 +15,7 @@ class App:
     """
 
     def __init__(self, df_data, df_stations, df_parameters):
-        def add_time_columns(df):
-            self.df_data = df_data
-            self.df_data['datum'] = pd.to_datetime(self.df_data['zeit']).dt.date
-            self.df_data['woche'] = df_data['zeit'].dt.isocalendar().week
-            self.df_data['mitte_woche_datum'] = pd.to_datetime(df_data['zeit']) - pd.to_timedelta(df_data['zeit'].dt.dayofweek % 7 - 2, unit='D')
-            self.df_data['mitte_woche_datum'] = df_data['mitte_woche_datum'].dt.date 
-            self.df_data['jahr'] = df_data['zeit'].dt.year    
-            self.df_data['monat'] = df_data['zeit'].dt.month  
-            return df
-
-        self.df_data = add_time_columns(df_data)
+        self.df_data = df_data
         self.df_stations = df_stations
         self.df_stations.set_index("id", inplace=True)
         self.dic_stations = df_stations['name'].to_dict()

@@ -11,6 +11,7 @@ import config
 from st_aggrid import AgGrid
 from datetime import datetime, timedelta
 import tools
+import config as cn
 
 plot_width = 800
 plot_height = 300
@@ -21,34 +22,64 @@ class App:
     """
 
     def __init__(self, df_data, df_stations, df_parameters):
-        def add_time_columns(df):
-            self.df_parameters = df_parameters
-            self.df_data = df_data
-            self.df_data['datum'] = pd.to_datetime(self.df_data['zeit']).dt.date
-            self.df_data['datum'] = pd.to_datetime(self.df_data['datum'])
-            self.df_data['woche'] = df_data['zeit'].dt.isocalendar().week
-            self.df_data['jahr'] = df_data['zeit'].dt.year    
-            self.df_data['monat'] = df_data['zeit'].dt.month 
-            self.df_data['mitte_woche'] = pd.to_datetime(df_data['datum']) - pd.to_timedelta(df_data['zeit'].dt.dayofweek % 7 - 2, unit='D')
-            #self.df_data['mitte_woche'] = df_data['mitte_woche_datum'].dt.date 
-            self.df_data['mitte_monat'] = pd.to_datetime(df_data['datum']) - pd.to_timedelta(df_data['zeit'].dt.day + 14, unit='D')
-            self.df_data['mitte_jahr'] = pd.to_datetime(df_data['datum']) - pd.to_timedelta(df_data['zeit'].dt.dayofyear + (365/2), unit='D')
-            self.df_data['stunde'] = pd.to_datetime(self.df_data['zeit']).dt.hour
-            self.df_data['tag'] = pd.to_datetime(self.df_data['zeit']).dt.day
-            return df
 
-        self.df_data = add_time_columns(df_data)
+        self.df_parameters = df_parameters
+        self.df_data = tools.add_time_columns(df_data)
         self.df_stations = df_stations
         self.df_stations.set_index("id", inplace=True)
         self.dic_stations = df_stations['name'].to_dict()
         self.station = {}
-        self.df_parameters = df_parameters
         self.lst_parameters = list(df_parameters.columns)
         self.start_jahr =  int(self.df_data['jahr'].min() + 1)
         self.end_jahr = int(self.df_data['jahr'].max())
         self.settings = {}
+            
+        self.plot_type_def =  {
+            'linechart': {
+                'legend': 'Liniendiagramm', 
+                'lst_time_agg': {
+                    'Jahr':{'col':'mitte_jahr', 'agg_interval': 'Jahr', 'title': 'Jahresmittelwerte', 'legend':"Jahresmittel",'settings':['parameters','date_from','date_to','show_band','mov_average_frame','show_guidelines'], 'defaults':{'date_from': datetime(self.start_jahr,1,1),'date_to':datetime.today(),'show_guidelines':True} },
+                    'Monat':{'col':'mitte_monat', 'agg_interval': 'Monat', 'title': "Monats-Mittelwerte ({} bis {})", 'legend':"Monatsmittel",'settings':['parameters','date_from','date_to','show_band','mov_average_frame','show_guidelines'], 'defaults':{'date_from': datetime.today()-timedelta(365),'date_to':datetime.today(),'show_guidelines':True} },
+                    'Woche':{'col':'mitte_woche', 'agg_interval': 'Woche', 'title': "Wochen-Mittelwerte ({} bis {})", 'legend':"Wochenmittel",'settings':['parameters','date_from','date_to','show_band','mov_average_frame','show_guidelines'], 'defaults':{'date_from': datetime(self.start_jahr,1,1),'date_to':datetime.today(),'show_guidelines':True} },
+                    'Tag':{'col':'datum', 'agg_interval': 'Tag', 'title': 'Monatsmittelwerte nach Jahr', 'legend':f"Tagesmittel",'settings':['parameters','date_from','date_to','show_band','mov_average_frame','show_guidelines'], 'defaults':{'date_from': datetime(self.start_jahr,1,1),'date_to':datetime.today(),'show_guidelines':True} },
+                    'Stunde':{'col':'zeit', 'agg_interval': 'Stunde', 'title': 'Wochenmittelwerte nach Jahr', 'legend':"Stundenmittel",'settings':['parameters','date_from','date_to','show_band','mov_average_frame','show_guidelines'], 'defaults':{'date_from': datetime(self.start_jahr,1,1),'date_to':datetime.today(),'show_guidelines':True} },
+                },
+            },
+            'barchart': {
+                'legend': 'Säulendiagramm', 
+                'lst_time_agg': {
+                    'Jahr':{'col':'jahr', 'agg_interval': 'Jahr', 'title': 'Jahresmittelwerte', 'legend':'Jahresmittel','settings':['parameters','years','show_guidelines'], 'defaults':{'parameters':'PM10','years':[self.start_jahr,self.end_jahr],'show_guidelines':False}, 'occurrence_expr': 'in'},
+                    'Monat':{'col':'monat', 'agg_interval': 'Monat', 'title': "Monats-Mittelwerte ({} bis {})", 'legend':'Monatsmittel','settings':['parameters','years','show_guidelines'], 'defaults':{'parameters':'PM10','years':[self.start_jahr,self.end_jahr],'show_guidelines':False}, 'occurrence_expr': 'im'},
+                    'Woche':{'col':'woche', 'agg_interval': 'Woche', 'title': "Wochen-Mittelwerte ({} bis {})", 'legend':'Wochenmittel','settings':['parameters','years','show_guidelines'], 'defaults':{'parameters':'PM10','years':[self.start_jahr,self.end_jahr],'show_guidelines':False}, 'occurrence_expr': 'in Woche'},
+                    'Jahr-Monat':{'col':'mitte_monat', 'agg_interval': 'Jahr und Monat', 'title': 'Monatsmittelwerte nach Jahr', 'legend':'Monatsmittel','settings':['parameters','years','show_guidelines'], 'defaults':{'parameters':'PM10','years':[self.start_jahr,self.end_jahr],'show_guidelines':False}, 'occurrence_expr': 'im'},
+                    'Jahr-Woche':{'col':'mitte_woche', 'agg_interval': 'Jahr und Woche', 'title': 'Wochenmittelwerte nach Jahr', 'legend':'Wochenmittel','settings':['parameters','years','show_guidelines'], 'defaults':{'parameters':'PM10','years':[self.start_jahr,self.end_jahr],'show_guidelines':False}, 'occurrence_expr': 'in Woche'},
+                }
+            },
+            'boxplot': {
+                'legend': 'Boxplot', 
+                'lst_time_agg': {
+                    'Jahr':{'col':'jahr', 'title': 'Jahresmittelwerte', 'legend':'Jahresmittel'},
+                    'Monat':{'col':'monat', 'title': "Monats-Mittelwerte ({} bis {})", 'legend':'Monatsmittel'},
+                    'Woche':{'col':'woche', 'title': "Wochen-Mittelwerte ({} bis {})", 'legend':'Wochenmittel'},
+                    'Jahr-Monat':{'col':'mitte_monat', 'title': 'Monatsmittelwerte nach Jahr', 'legend':'Monatsmittel'},
+                    'Jahr-Woche':{'col':'mitte_woche', 'title': 'Wochenmittelwerte nach Jahr', 'legend':'Wochenmittel'}
+                },
+            },
+            'heatmap': {
+                'legend': 'Heatmap', 
+                'lst_time_agg': {
+                    'Jahr':{'col':'jahr', 'title': 'Jahresmittelwerte', 'legend':'Jahresmittel'},
+                    'Monat':{'col':'monat', 'title': "Monats-Mittelwerte ({} bis {})", 'legend':'Monatsmittel'},
+                    'Woche':{'col':'woche', 'title': "Wochen-Mittelwerte ({} bis {})", 'legend':'Wochenmittel'},
+                    'Jahr-Monat':{'col':'mitte_monat', 'title': 'Monatsmittelwerte nach Jahr', 'legend':'Monatsmittel'},
+                    'Jahr-Woche':{'col':'mitte_woche', 'title': 'Wochenmittelwerte nach Jahr', 'legend':'Wochenmittel'}
+                },
+            }           
+        }
+        plot_legends = [x['legend'] for x in self.plot_type_def.values()]
+        plot_keys = [x for x in self.plot_type_def.keys()]
+        self.plot_type_options = dict(zip(plot_keys, plot_legends))
     
-
     def filter_data(self):
         df = self.df_data
 
@@ -64,6 +95,25 @@ class App:
             df = df[df['monat']==self.settings['monat']]
         return df
     
+
+    def get_settings(self, required_options, defaults):
+        """
+        available options: ['agg_time','parameters','date_from','show_band','mov_average_frame','show_guidelines', 'years']
+        """
+        for x in required_options:
+            if x == 'parameters':
+                self.settings['parameters'] = st.sidebar.multiselect("Parameters", options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
+            if x == 'years':
+                self.settings['years'] = st.sidebar.slider('🔍Jahr', self.start_jahr, self.end_jahr, defaults['years'])
+            if x == 'date_from':
+                self.settings['date_from'] = st.sidebar.date_input('Von Datum', min_value=datetime(2003,1,1), max_value=datetime.now(), value=defaults['date_from'])
+                self.settings['date_to'] = st.sidebar.date_input('Bis Datum', min_value=datetime(2003,1,1), max_value=datetime.now(), value=defaults['date_to'])
+            if x == 'show_band':
+                self.settings['show_band'] = st.sidebar.checkbox("Zeige 90% Fläche")
+            if x == 'mov_average_frame':
+                self.settings['mov_average_frame'] = st.sidebar.number_input("Zeige gleitendes Mittel (0 für nicht Anzeigen)", min_value=0, max_value=int(366/2))
+            if x == 'show_guidelines':
+                self.settings['show_guidelines'] = st.sidebar.checkbox('Zeige Grenzwerte', True)
 
     def show_boxplot(self):  
         def get_text(df, par):
@@ -148,44 +198,64 @@ class App:
                     return ''
 
             text = f"Diese Figur zeigt Zeitreihe von {par} von {self.settings['date_from'].strftime('%d.%m.%Y')} bis {self.settings['date_to'].strftime('%d.%m.%Y')}. "\
-                f"Die Messwerte wurden zu einem Wert pro {self.settings['agg_time']} aggregiert. Diese Werte werden durch die durchgezogene Linie dargestellt.{band_expr()}{mov_avg()}"
+                f"Die Messwerte wurden zu einem Wert pro {self.settings['agg_time']['agg_interval']} aggregiert. Diese Werte werden durch die durchgezogene Linie dargestellt.{band_expr()}{mov_avg()}"
             return text 
         
-        
-        def get_settings():
-            self.settings['agg_time'] = st.sidebar.selectbox("Aggregiere Messungen nach",options=['Monat','Woche','Tag','Stunde'])
-            self.settings['parameters'] = st.sidebar.multiselect("Parameters",options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
-            self.settings['date_from'] = st.sidebar.date_input('Von Datum',min_value=datetime(2003,1,1), max_value=datetime.now(), value=datetime.now()-timedelta(365))
-            self.settings['date_to'] = st.sidebar.date_input('Bis Datum',min_value=datetime(2003,1,1), max_value=datetime.now(), value=datetime.now())
-            #if self.settings['agg_time'] in ('Tag','Stunde'):
-            #    self.settings['monat'] = st.sidebar.selectbox("Monat",options=list(config.MONTHS_DICT.values()))
-            self.settings['show_band'] = st.sidebar.checkbox("Zeige 90% Fläche")
-            self.settings['mov_average_frame'] = st.sidebar.number_input("Zeige gleitendes Mittel (0 für nicht Anzeigen)", min_value=0, max_value=int(366/2))
-        
 
-        def aggregate_data(df,par):   
+        def prepare_data(df, par):
             par_title = par.replace('.','')  # remove dot, as it cannot be displayed in aggrid 
-            t_agg =   dict_agg_variable[self.settings['agg_time']]       
-            df = df[[par] + [t_agg]]
-            df = df.melt(id_vars=[t_agg], value_vars=par)
-            df = df.groupby([t_agg, 'variable'])['value'].agg(['mean', tools.percentile(5), tools.percentile(95)]).reset_index()
-            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {dict_titles[self.settings['agg_time']]}"
+            t_agg = self.settings['agg_time']
+            df = df.melt(id_vars=[t_agg['col']], value_vars=par)
+            df = df.groupby([t_agg['col'], 'variable'])['value'].agg(['mean', tools.percentile(5), tools.percentile(95)]).reset_index()
+            df = df.rename(columns = {'variable': 'Legende', 'mean': 'Wert'})
+            return df, par_title
+
+        def prepare_plot(df, par, par_title):
+            def get_lines():
+                lines = []
+                colors = []
+                if self.settings['show_guidelines']:
+                    guidelines = self.df_parameters[par]['guidelines']
+                    # makre sure that e.g. a limit for the daily average is not shown with data averaged yearly as it might suggest
+                    # that things are perfect
+                    for gl in guidelines:
+                        if tools.is_valid_timeagg(gl["time_agg_field"], self.settings['agg_time']['col']):
+                            overlay = pd.DataFrame({'y': [gl['value']], 'Legende': [gl['legend']]})
+                            line = alt.Chart(overlay).mark_rule(strokeWidth=2).encode(
+                                    y="y", 
+                                    color=alt.Color("Legende:N")
+                            )
+                            lines.append(line)
+                            colors.append(gl['color'])
+                    colors.append('steelblue')
+                return lines, colors
+
+            t_agg = self.settings['agg_time']
+            self.settings['lines'], legend_colors = get_lines()
+            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {t_agg['title']}"
             self.settings['tooltip'] = list(df.columns)
-            self.settings['x'] = alt.X(f"{t_agg}:T", 
-                axis=alt.Axis(title=''))
-            self.settings['y'] = alt.Y("mean:Q", 
+            self.settings['color'] = alt.Color('Legende:N', 
+                scale=alt.Scale(range=legend_colors),
+                # sort = alt.EncodingSortField( 'order', order = 'ascending' ),
+            )
+
+            if t_agg['col'] in ['jahr','monat','woche']:
+                self.settings['x'] = alt.X(f"{t_agg['col']}:N", 
+                    axis=alt.Axis(title=''))
+            else:
+                self.settings['x'] = alt.X(f"{t_agg['col']}:T", 
+                    axis=alt.Axis(title='', format="%b %Y"))
+            self.settings['y'] = alt.Y(f"Wert:Q", 
                 axis=alt.Axis(title='Konzentration in µg/m3'))
-            self.settings['y_par'] = "mean"
-            self.settings['color'] = alt.Color("variable:N")
-            
-            return df
+            self.settings['color'] = alt.Color('Legende')
+            self.settings['y_par'] = par
 
         def show_plot(df):
             chart = alt.Chart(df).mark_line().encode(  
-            x=self.settings['x'],
-            y=self.settings['y'],
-            color=self.settings['color'],
-            tooltip = self.settings['tooltip']
+                x=self.settings['x'],
+                y=self.settings['y'],
+                color=self.settings['color'],
+                tooltip = self.settings['tooltip']
             ).properties(width=plot_width,height=plot_height,title=self.settings['plot_title'])
             
             if self.settings['show_band']:
@@ -195,41 +265,36 @@ class App:
                     x=self.settings['x'],
                     y='percentile_5',
                     y2='percentile_95',
-                    color = 'variable'
+                    color=alt.Color('Legende')
                 )
             if self.settings['mov_average_frame']>0:
+                df['legend_mov_avg'] = 'Gleitendes Mittel'
                 line_mov_avg = alt.Chart(df).mark_line(
                     strokeDash=[5,2],
-                    size=2
+                    size=2,
+                    color="legend_mov_avg:N",
                 ).transform_window(
-                    rolling_mean=f"mean({self.settings['y_par']})",
+                    rolling_mean=f"mean(Wert)",
                     frame=[-self.settings['mov_average_frame'], self.settings['mov_average_frame']]
                 ).encode(
                     x=self.settings['x'],
                     y='rolling_mean:Q',
-                    color = alt.Color('variable')
                 )
 
-            combi = chart
-            combi += band if self.settings['show_band'] else combi
-            combi = combi + line_mov_avg if self.settings['mov_average_frame'] > 0 else combi
-            st.altair_chart(combi)
+            chart += band if self.settings['show_band'] else chart
+            chart = chart + line_mov_avg if self.settings['mov_average_frame'] > 0 else chart
+            if self.settings['show_guidelines']:
+                for line in self.settings['lines']:
+                    chart += line
+            st.altair_chart(chart)
         
-        dict_agg_variable = {'Jahr':'mitte_jahr', 
-            'Monat':'mitte_monat',
-            'Woche':'mitte_woche',
-            'Tag': 'datum',
-            'Stunde': 'zeit'}
-        get_settings()
-        dict_titles = {'Jahr':'Jahresmittelwerte', 
-            'Monat':f"Monats-Mittelwerte ({self.settings['date_from']} bis {self.settings['date_to']})",
-            'Woche':f"Wochen-Mittelwerte ({self.settings['date_from']} bis {self.settings['date_to']})",
-            'Tag': f"Tagesmittelwerte ({self.settings['date_from']} bis {self.settings['date_to']})",
-            'Stunde': 'Stunden-Mittelwerte'
-        }
+
+        self.get_settings(self.settings['agg_time']['settings'], self.settings['agg_time']['defaults'])
+        
         for par in self.settings['parameters']:
             df = self.filter_data()
-            df = aggregate_data(df, par)
+            df, par_title = prepare_data(df, par)
+            prepare_plot(df, par, par_title)
             show_plot(df)
             st.markdown(get_text(df,par))
             with st.beta_expander('Data'):
@@ -238,90 +303,121 @@ class App:
 
 
     def show_barchart(self):
-        def get_text(df):
+        def get_text(df,par,par_title):
             def get_guidelines():
                 result = ""
                 if self.settings['show_guidelines']:
-                    result = f"Die horizontalen Linien zeigen den Grenzwert."
+                    result = f" Die horizontalen Linien zeigen den Grenzwert für diesen Schadstoff."
                 return result
-            text = f"Diese Figur zeigt Zeitreihe von {self.settings['par']} von {self.settings['date_from']} bis {self.settings['date_to']} an Station `{self.station['name']}`. "\
-                f"Die Messwerte wurden zu einem Wert pro {self.settings['agg_time']} aggregiert (Mittelwert). {get_guidelines()}"
+
+            def min_max_comment():
+                def get_occurrence_expression(t):
+                    return f"{t_agg['occurrence_expr']} {t}"
+
+                unit = self.df_parameters[par]['unit']
+                min_val = df[par_title].min()
+                rec = df[df[par_title]==min_val]
+                t_agg = self.settings['agg_time']
+                min_time = rec[t_agg['col']].iloc[0]
+
+                max_val = df[par_title].max()
+                rec = df[df[par_title]==max_val]
+                max_time = rec[t_agg['col']].iloc[0]
+
+                avg_val = df[par_title].mean() 
+
+                text = (f" Der durchschnittliche Wert beträgt {avg_val: .1f}{unit}. Der tiefste Wert von {min_val: .1f}{unit} wurde {get_occurrence_expression(min_time)} erreicht,\n"
+                    f" das Maximum von {max_val: .1f}{unit} trat {t_agg['occurrence_expr']} {max_time} auf.")
+                return text
+                
+            
+            min_max_comment()
+            text = f"Diese Figur zeigt Zeitreihe von {par} von {self.settings['years'][0]} bis {self.settings['years'][1]} an Station {self.station['name']}. "\
+                f"Die Messwerte wurden zu einem Wert pro {self.settings['agg_time']['agg_interval']} aggregiert (Mittelwert).{min_max_comment()}{get_guidelines()}"
             return text 
 
-        def get_settings():
-            self.settings['agg_time'] = st.sidebar.selectbox("Aggregiere Messungen nach",options=list(dict_agg_variable.keys()))
-            self.settings['parameters'] = st.sidebar.multiselect("Parameters",options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
-            self.settings['years'] = st.sidebar.slider('🔍Jahr', self.start_jahr, self.end_jahr, (self.start_jahr, self.end_jahr))
-            if self.settings['agg_time'] == 'Monat-Stunde':
-                self.settings['monat'] = st.sidebar.selectbox("Parameter",options=list(config.MONTHS_DICT.values()))
-            self.settings['show_guidelines'] = st.sidebar.checkbox('Zeige Grenzwerte', True)
-
-        def aggregate_data(df, par):
+        def prepare_data(df, par):
             par_title = par.replace('.','')  # remove dot, as it cannot be displayed in aggrid 
-            t_agg = dict_agg_variable[self.settings['agg_time']]
-            df = df.groupby([t_agg])[par].agg(['mean'])
-            
+            t_agg = self.settings['agg_time']
+            df = df.groupby(t_agg['col'])[par].agg(['mean'])
             df = df.rename(columns = {'mean': par_title})
-            
+            df['Legende'] = t_agg['legend']
             df = df.reset_index()
-            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {dict_titles[self.settings['agg_time']]}"
+            if t_agg['col']=='monat':
+                df = df.replace({'monat': cn.MONTHS_DICT})
+            
+            return df, par_title
+
+        def prepare_plot(df, par, par_title):
+            def get_lines():
+                lines = []
+                colors = []
+                if self.settings['show_guidelines']:
+                    guidelines = self.df_parameters[par]['guidelines']
+                    for gl in guidelines:
+                        overlay = pd.DataFrame({'y': [gl['value']], 'Legende': [gl['legend']]})
+                        line = alt.Chart(overlay).mark_rule(strokeWidth=2).encode(
+                                y="y", 
+                                color=alt.Color("Legende:N")
+                        )
+                        lines.append(line)
+                        colors.append(gl['color'])
+                colors.append('steelblue')
+                return lines, colors
+
+            t_agg = self.settings['agg_time']
+            self.settings['lines'], legend_colors = get_lines()
+            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {t_agg['title']}"
             self.settings['bar_width'] = plot_width / 2 / len(df) 
-            self.settings['tooltip'] =list(df.columns)
-            if t_agg in ['jahr','monat','woche']:
-                self.settings['x'] = alt.X(f"{t_agg}:N", 
+            self.settings['tooltip'] = list(df.columns)
+            self.settings['color'] = alt.Color('Legende:N', 
+                scale=alt.Scale(range=legend_colors),
+                # sort = alt.EncodingSortField( 'order', order = 'ascending' ),
+            )
+            if t_agg['col'] == 'monat':
+                self.settings['x'] = alt.X(f"{t_agg['col']}:N", 
+                    axis=alt.Axis(title=''),
+                    sort=list(cn.MONTHS_REV_DICT.keys()))
+            elif t_agg['col'] in ['jahr','woche']:
+                self.settings['x'] = alt.X(f"{t_agg['col']}:N", 
                     axis=alt.Axis(title=''))
             else:
-                self.settings['x'] = alt.X(f"{t_agg}:T", 
+                self.settings['x'] = alt.X(f"{t_agg['col']}:T", 
                     axis=alt.Axis(title='', format="%b %Y"))
-            self.settings['y'] = alt.Y(f"{par_title}:Q", 
-                axis=alt.Axis(title='Konzentration in µg/m3'))
+            if t_agg['col'] == 'monat':
+                self.settings['y'] = alt.Y(f"{par_title}:Q", 
+                    axis=alt.Axis(title='Konzentration in µg/m3'),
+                )
+            else:
+                self.settings['y'] = alt.Y(f"{par_title}:Q", 
+                    axis=alt.Axis(title='Konzentration in µg/m3'))
             self.settings['y_par'] = par
+            
                 #self.settings['x_scale'] = (1,23)
-            return df
+            
 
-        def show_plot(df, par):
-            if self.settings['show_guidelines']:
-                lines = []
-                guidelines = self.df_parameters[par]['guidelines']
-
-                for gl in guidelines:
-                    df[gl['legend']] = gl['value']
-                    line = alt.Chart(df).mark_rule(color=gl['color']).encode(y=gl['legend'], tooltip=gl['legend'])
-                    lines.append(line)
-
+        def show_plot(df):
             chart = alt.Chart(df).mark_bar(clip=True, width = self.settings['bar_width']).encode(
                 x=self.settings['x'], 
                 y=self.settings['y'], 
-                tooltip = self.settings['tooltip']
+                color = self.settings['color'], 
+                tooltip = self.settings['tooltip'],
             ).properties(width=plot_width,height=plot_height,title=self.settings['plot_title'])
             
             if self.settings['show_guidelines']:
-                for line in lines:
+                for line in self.settings['lines']:
                     chart += line
-                
-            st.altair_chart(chart )
+            st.altair_chart(chart)  #.resolve_scale(color='independent') 
 
-        dict_agg_variable = {'Jahr':'jahr', 
-            'Monat':'monat',
-            'Woche':'woche',
-            'Jahr-Monat':'mitte_monat',
-            'Jahr-Woche':'mitte_woche'
-        }
-        get_settings()
-        dict_titles = {'Jahr':'Jahresmittelwerte', 
-            'Monat':f"Monats-Mittelwerte ({self.settings['years'][0]} bis {self.settings['years'][1]})",
-            'Woche':f"Wochen-Mittelwerte ({self.settings['years'][0]} bis {self.settings['years'][1]})",
-            'Tag': f"Tagesmittelwerte ({self.settings['years'][0]} bis {self.settings['years'][1]})",
-            'Stunde': 'Stunden-Mittelwerte',
-            'Jahr-Monat':'Monatsmittelwerte nach Jahr',
-            'Jahr-Woche':'Wochenmittelwerte nach Jahr'
-        }
 
+        self.get_settings(self.settings['agg_time']['settings'],self.settings['agg_time']['defaults'])
+        
         for par in self.settings['parameters']:
             df = self.filter_data()
-            df = aggregate_data(df, par)
-            show_plot(df, par)
-            # st.markdown(get_text(df))
+            df, par_title = prepare_data(df, par)
+            prepare_plot(df, par, par_title)
+            show_plot(df)
+            st.markdown(get_text(df,par, par_title))
             with st.beta_expander('Data'):
                 AgGrid(df)
                 st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
@@ -343,9 +439,13 @@ class App:
             df = df.rename(columns={'mean': par_title}).reset_index()
             self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {dict_titles[self.settings['agg_time']]}"
             self.settings['tooltip'] = list(df.columns)
+            
             self.settings['x'] = alt.X(t_agg['x'], 
-                axis=alt.Axis(title=t_agg['x_title']))
+                sort=list(cn.MONTHS_REV_DICT.keys()),
+                axis=alt.Axis(title=t_agg['x_title'])
+            )
             self.settings['y'] = alt.Y(t_agg['y'], 
+                sort=list(cn.MONTHS_REV_DICT.keys()),
                 axis=alt.Axis(title=t_agg['y_title']))
             self.settings['color'] = alt.Color(f"{par_title}:Q")
             return df
@@ -366,7 +466,8 @@ class App:
             'Tag':{'x':'tag:O','y':'monat:O','group_by':['tag','monat'],'x_title':'Tag','y_title':'Monat'},
             'Stunde':{'x':'stunde:N','y':'tag:N','group_by':['stunde','tag'],'x_title':'Stunde','y_title':'Tag'},
         }
-        get_settings()
+        st.write(self.settings['plot_type'])
+        get_settings(['agg_time','parameters','years','show_guidelines'])
         dict_titles = {'Jahr':'Jahresmittelwerte', 
             'Monat':f"Monats-Mittelwerte ({self.settings['years'][0]} bis {self.settings['years'][1]})",
             'Woche':f"Wochen-Mittelwerte ({self.settings['years'][0]} bis {self.settings['years'][1]})",
@@ -386,19 +487,25 @@ class App:
 
 
     def show_menu(self):
-        plot_types = ['Säulendiagramm', 'Liniendiagramm', 'Boxplot', 'Heatmap']
-        plot_type = st.sidebar.selectbox("Grafiktyp", options=plot_types)
+        _plot_type = st.sidebar.selectbox("Grafiktyp", options=list(self.plot_type_options.keys()),
+            format_func=lambda x: self.plot_type_options[x])    
+        self.settings['plot_type'] = self.plot_type_def[_plot_type]
         
         _station_id = st.sidebar.selectbox('Station', list(self.dic_stations.keys()),
                 format_func=lambda x: self.dic_stations[x])    
         self.station = self.df_stations.loc[_station_id]
-        if plot_type == 'Säulendiagramm':
+        
+        time_agg_options = list(self.settings['plot_type']['lst_time_agg'].keys())
+        _time_agg = st.sidebar.selectbox("Aggregiere Messungen nach", options=time_agg_options)
+        self.settings['agg_time'] = self.settings['plot_type']['lst_time_agg'][_time_agg]
+
+        if _plot_type == 'barchart':
             self.show_barchart()
-        elif plot_type == 'Liniendiagramm':
+        elif _plot_type == 'linechart':
             self.show_linechart()
-        elif plot_type == 'Boxplot':
+        elif _plot_type == 'boxplot':
             self.show_boxplot()
-        elif plot_type == 'Heatmap':
+        elif _plot_type == 'heatmap':
             self.show_heatmap()
 
         

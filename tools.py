@@ -218,3 +218,33 @@ def get_base64_encoded_image(image_path):
     """
     with open(image_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode('utf-8')
+
+
+def add_time_columns(df_data):            
+    df = df_data
+    df['datum'] = pd.to_datetime(df['zeit']).dt.date
+    df['datum'] = pd.to_datetime(df['datum'])
+    df['woche'] = df_data['zeit'].dt.isocalendar().week
+    df['jahr'] = df_data['zeit'].dt.year    
+    df['monat'] = df_data['zeit'].dt.month 
+    df['mitte_woche'] = pd.to_datetime(df_data['datum']) - pd.to_timedelta(df['zeit'].dt.dayofweek % 7 - 2, unit='D')
+    df['mitte_monat'] = pd.to_datetime(df['datum']) - pd.to_timedelta(df['zeit'].dt.day + 14, unit='D')
+    df['mitte_jahr'] = df['datum'] - pd.to_timedelta(df['zeit'].dt.dayofyear, unit='D') + pd.to_timedelta(364/2, unit='D')
+    df['stunde'] = pd.to_datetime(df['zeit']).dt.hour
+    df['tag'] = df['zeit'].dt.day
+    return df
+
+def is_valid_timeagg(gl_time_agg, settings_agg)->bool:
+    """
+    checks if guideline time aggregation fits aggreation of values in plot
+    """
+
+    dic = {'jahr':['jahr', 'mitte_jahr'],
+        'monat': ['monat', 'mitte_monat'],
+        'datum': ['monat', 'datum', 'tag'],
+        'stunde': ['stunde', 'zeit'],
+    }
+    result = False
+    if gl_time_agg in dic.keys():
+        result = settings_agg in dic[gl_time_agg]
+    return result

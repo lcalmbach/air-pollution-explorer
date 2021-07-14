@@ -6,6 +6,7 @@ import streamlit as st
 import logging
 import pandas as pd
 import requests
+import numpy as np
 
 import apox_stats
 import apox_info
@@ -41,6 +42,8 @@ def init():
         page_title='LQX.bs',  # String or None. Strings get appended with "• Streamlit". 
         page_icon='🌎',  # String, anything supported by st.image, or None.
     )
+
+
 def get_data():
     def get_most_recent_record(df):
         """
@@ -116,20 +119,26 @@ def get_data():
         data = requests.get(get_url()).json()
         df_ogd = extract_data(data)
 
+        # save data if df_ogd has data, meaning that more recent data was discovered
         if len(df_ogd) > 0:
             df = df.append(df_ogd)
             try:
                 df.to_parquet('./data/apox_data.pq')
                 logging.info(f'die neusten Daten wurden in apox_data.pq gespeichert')
             except:
-                st.warning('De neusten Daten konnten nicht gespeichert werden')
-        # now add data
+                st.warning('Die neusten Daten konnten nicht gespeichert werden')
+        
+        df = tools.add_time_columns(df)
         return df 
     
     def get_local_data():
         df_data = pd.read_parquet('./data/apox_data.pq')
         df_stations = pd.read_json('./data/stations.json')
         df_parameters = pd.read_json('./data/parameters.json')
+
+        # PM2.5 was measured since 2017 only, a few ghost records exists since 2017
+        df_data['jahr'] = df_data['zeit'].dt.year    
+        df_data['PM2.5'] = np.where(df_data['jahr'] > 2016, df_data['PM2.5'], np.nan)
         logging.info(f'data was read from local files')
         return df_data, df_stations, df_parameters
     

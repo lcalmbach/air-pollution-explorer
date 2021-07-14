@@ -13,12 +13,9 @@ LOGO_REFERENCE: str = 'https://github.com/lcalmbach/ede/blob/main/static/images/
 USER_MANUAL_LINK: str = 'https://ede.readthedocs.io/en/latest/'
 HELP_ICON: str = 'https://img.icons8.com/offices/30/000000/help.png'
 
-EDEX_HOME = 'p00'
 default_plot_width = 800
 default_plot_height = 600
 
-LATITUDE_COLUMN = 'latitude'
-LONGITUDE_COLUMN = 'longitude'
 MAP_LEGEND_SYMBOL_SIZE: int = 10
 MAPBOX_STYLE: str = "mapbox://styles/mapbox/light-v10"
 GRADIENT: str = 'blue-green'
@@ -26,7 +23,6 @@ TOOLTIP_FONTSIZE = 'x-small'
 TOOLTIP_BACKCOLOR = 'white'
 TOOLTIP_FORECOLOR = 'black'
 
-STAT_FUNCTIONS_LIST = ['sum','count','avg','min','max','std']
 tz_GMT = pytz.timezone('Europe/London')
 
 MONTHS_DICT = {1:'Jan',2:'Feb',3:'Mrz',4:'Apr',5:'Mai',6:'Jun',7:'Jul',8:'Aug',9:'Sep',10:'Okt',11:'Nov',12:'Dez',}
