@@ -1,8 +1,8 @@
 ## Luftqualität Parameter
 ### Feinstaub (PM10, PM2.5)
-Am 11. April 2018 hat der Bundesrat Änderungen an der Luftreinhalte-Verordnung genehmigt, namentlich die Festlegung eines Immissionsgrenzwertes für Feinstaub PM2.5. Der Grenzwert von 10 µg/m3, für das Jahresmittel entspricht den Empfehlungen der Weltgesundheitsorganisation und ergänzt die bestehenden Grenzwerte für PM10. Die Belastung der Luft mit diesen winzigen Staubteilchen hat grosse Auswirkungen auf die menschliche Gesundheit und ist eine Herausforderung für die Schweizer Luftreinhalte-Politik.
+Am 11. April 2018 hat der Bundesrat Änderungen an der Luftreinhalte-Verordnung genehmigt, namentlich die Festlegung eines Immissionsgrenzwertes für Feinstaub PM2.5. Der Grenzwert von 10 µg/m³, für das Jahresmittel entspricht den Empfehlungen der Weltgesundheitsorganisation und ergänzt die bestehenden Grenzwerte für PM10. Die Belastung der Luft mit diesen winzigen Staubteilchen hat grosse Auswirkungen auf die menschliche Gesundheit und ist eine Herausforderung für die Schweizer Luftreinhalte-Politik.
 
-Feinpartikel  sind ein komplexes Gemisch und bestehen aus:
+Feinpartikel sind ein komplexes Gemisch und bestehen aus:
 
 - primären Partikeln, die direkt durch Verbrennungsprozesse ausgestossen werden (z.B. Dieselmotoren, Holzheizungen), durch mechanischen Abrieb von Reifen, Bremsen, Strassenbelag und Aufwirbelung entstehen oder aus natürlichen Quellen stammen.
 - sekundären Partikeln, welche sich erst in der Luft aus gasförmigen Vorläuferschadstoffen (Schwefeldioxid, Stickoxide, Ammoniak, flüchtige organische Verbindungen) bilden.
@@ -30,8 +30,7 @@ Die Massnahmen des Bundes zur Reduktion des Sommersmogs konzentrieren sich auf d
 ### Grenzwerte
 | Schadstoff  | Grenze  |Beschreibung   |
 |---|---|---|
-| PM2.5 |10µg/m3 | Grenzwert für das Jahresmittel |
-| PM10 |20µg/m3 | Grenzwert für das Jahresmittel |
-| PM10 |50µg/m3 | 24 Stunden Grenzwert, darf 3 mal pro Jahr überschritten werden |
-| Ozone |100µg/m3 | 98% der Halbstunden-Mittelwerte sind kleiner als 100µg/m3 |
-| Ozone |120µg/m3 | Stündlicher Mittelwert darf einmal pro Jahr überschritten werden |
+| PM2.5 |10µg/m³| Grenzwert für das Jahresmittel |
+| PM10 |20µg/m³ | Grenzwert für das Jahresmittel |
+| PM10 |50µg/m³ | 24 Stunden Grenzwert, darf 3 mal pro Jahr überschritten werden |
+| Ozone |120µg/m³ | Stündlicher Mittelwert darf einmal pro Jahr überschritten werden |

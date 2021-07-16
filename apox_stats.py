@@ -17,11 +17,9 @@ class App:
     def __init__(self, df_data, df_stations, df_parameters):
         self.df_data = df_data
         self.df_stations = df_stations
-        self.df_stations.set_index("id", inplace=True)
         self.dic_stations = df_stations['name'].to_dict()
         self.station = {}
         self.df_parameters = df_parameters
-
 
         self.start_jahr =  int(self.df_data['jahr'].min() + 1)
         self.end_jahr = int(self.df_data['jahr'].max())

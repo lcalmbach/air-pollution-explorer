@@ -43,7 +43,7 @@ def init():
         page_icon='🌎',  # String, anything supported by st.image, or None.
     )
 
-
+# @st.cache(allow_output_mutation=True)
 def get_data():
     def get_most_recent_record(df):
         """
@@ -135,7 +135,7 @@ def get_data():
         df_data = pd.read_parquet('./data/apox_data.pq')
         df_stations = pd.read_json('./data/stations.json')
         df_parameters = pd.read_json('./data/parameters.json')
-
+        df_stations.set_index("id", inplace=True)
         # PM2.5 was measured since 2017 only, a few ghost records exists since 2017
         df_data['jahr'] = df_data['zeit'].dt.year    
         df_data['PM2.5'] = np.where(df_data['jahr'] > 2016, df_data['PM2.5'], np.nan)
@@ -155,7 +155,8 @@ def main():
         format_func=lambda x: MENU_DIC[x])
     #app.show_menu()
     df_data, df_stations, df_parameters = get_data()
-    app = app.App(df_data, df_stations, df_parameters)
+
+    app = app.App(df_data.copy(deep=True), df_stations.copy(deep=True), df_parameters.copy(deep=True))
     app.show_menu()
     header_html = "<a href = 'https://lcalmbach.github.io/lqx-help/' target = '_blank'><img src='data:image/png;base64,{}' class='img-fluid' style='width:45px;height:45px;'></a><br>".format(
     tools.get_base64_encoded_image("./images/help2.jpg")
