@@ -24,7 +24,7 @@ class App:
     """
 
     def __init__(self, df_data, df_stations, df_parameters):
-        setlocale(LC_ALL, 'de_DE')
+        setlocale(LC_ALL, 'de_CH')
         self.df_parameters = df_parameters
         self.df_data = tools.add_time_columns(df_data)
         self.df_stations = df_stations
