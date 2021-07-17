@@ -18,7 +18,6 @@ class App:
     def __init__(self, df_data, df_stations, df_parameters):
         self.df_data = tools.add_time_columns(df_data)
         self.df_stations = df_stations
-        self.df_stations.set_index("id", inplace=True)
         self.dic_stations = df_stations['name'].to_dict()
         self.station = {}
         self.df_parameters = df_parameters
@@ -54,7 +53,7 @@ class App:
         return (df['jahr'].unique().tolist())
 
 
-    def analyse_excceedances(self, gl, par, df):
+    def analyse_exceedances(self, gl, par, df):
         def analyse_year(df):
             def get_text():
                 text = f"""In den Jahren {self.settings['years'][0]} bis {self.settings['years'][1]} wurde der Grenzwert für 
@@ -167,7 +166,7 @@ class App:
         for par in self.parameters:
             rec = self.df_parameters[par]
             for gl in rec['guidelines']:
-                self.analyse_excceedances(gl, rec, df)
+                self.analyse_exceedances(gl, rec, df)
 
 
     def show_menu(self):

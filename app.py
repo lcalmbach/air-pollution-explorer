@@ -21,7 +21,7 @@ __version__ = '0.0.3'
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
 VERSION_DATE = '2021-07-17'
-my_name = '🌎Luft-Qualität-Explorer.BS'
+my_name = '🌎Luft-Qualität-Explorer-BS'
 my_kuerzel = "lqx.bs"
 GIT_REPO = 'https://github.com/lcalmbach/air-pollution-explorer'
 
@@ -136,7 +136,7 @@ def get_data():
         df_stations = pd.read_json('./data/stations.json')
         df_parameters = pd.read_json('./data/parameters.json')
         df_stations.set_index("id", inplace=True)
-        # PM2.5 was measured since 2017 only, a few ghost records exists since 2017
+        # PM2.5 was measured since 2017 only, a few ghost records exists since 2003
         df_data['jahr'] = df_data['zeit'].dt.year    
         df_data['PM2.5'] = np.where(df_data['jahr'] > 2016, df_data['PM2.5'], np.nan)
         logging.info(f'data was read from local files')
