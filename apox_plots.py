@@ -13,6 +13,7 @@ from st_aggrid import AgGrid
 from datetime import datetime, timedelta
 import tools
 import config as cn
+from locale import setlocale, LC_ALL
 
 plot_width = 800
 plot_height = 300
@@ -23,7 +24,7 @@ class App:
     """
 
     def __init__(self, df_data, df_stations, df_parameters):
-
+        setlocale(LC_ALL, 'de_DE')
         self.df_parameters = df_parameters
         self.df_data = tools.add_time_columns(df_data)
         self.df_stations = df_stations
@@ -39,10 +40,10 @@ class App:
                 'legend': 'Liniendiagramm', 
                 'lst_time_agg': {
                     'Jahr':{'col':'mitte_jahr', 'agg_interval': 'Jahr', 'title': 'Jahresmittelwerte', 'legend':"Jahresmittel",'settings':['parameters','date_from','date_to','show_band','show_guidelines'], 'defaults':{'date_from': datetime(self.start_jahr,1,1),'date_to':datetime.today(),'show_guidelines':True}, 'occurrence_expr': 'in', 'time_fmt_from_to':'%Y', 'time_fmt_occurrence': '%Y', 'time_fmt_x_axis': '%Y' },
-                    'Monat':{'col':'mitte_monat', 'agg_interval': 'Monat', 'title': "Monats-Mittelwerte", 'legend':"Monatsmittel",'settings':['parameters','date_from','date_to','show_band','show_guidelines'], 'defaults':{'date_from': datetime.today()-timedelta(365),'date_to':datetime.today(),'show_guidelines':True}, 'occurrence_expr': 'im', 'time_fmt_from_to':'%Y', 'time_fmt_occurrence': '%B %Y', 'time_fmt_x_axis': '%b %Y' },
-                    'Woche':{'col':'mitte_woche', 'agg_interval': 'Woche', 'title': "Wochen-Mittelwerte", 'legend':"Wochenmittel",'settings':['parameters','date_from','date_to','show_band','show_guidelines'], 'defaults':{'date_from': datetime(self.start_jahr,1,1),'date_to':datetime.today(),'show_guidelines':True}, 'occurrence_expr': 'in Woche', 'time_fmt_from_to':'%Y', 'time_fmt_occurrence': '%U %Y', 'time_fmt_x_axis': '%b %Y' },
-                    'Tag':{'col':'datum', 'agg_interval': 'Tag', 'title': 'Monatsmittelwerte nach Jahr', 'legend':f"Tagesmittel",'settings':['parameters','date_from','date_to','show_band','show_guidelines'], 'defaults':{'date_from': datetime.today()-timedelta(days=30),'date_to':datetime.today(),'show_guidelines':True}, 'occurrence_expr': 'in', 'time_fmt_from_to':'%d. %B %Y', 'time_fmt_occurrence': '%d. %B %Y', 'time_fmt_x_axis': '%d.%m.%Y' },
-                    'Stunde':{'col':'zeit', 'agg_interval': 'Stunde', 'title': 'Wochenmittelwerte nach Jahr', 'legend':"Stundenmittel",'settings':['parameters','date_from','date_to','show_guidelines'], 'defaults':{'date_from': datetime.today()-timedelta(days=30),'date_to':datetime.today(),'show_guidelines':True}, 'occurrence_expr': 'am', 'time_fmt_from_to':'%d. %B', 'time_fmt_occurrence': '%d. %B %Y %H:%M', 'time_fmt_x_axis': '%d.%m.%Y' },
+                    'Monat':{'col':'mitte_monat', 'agg_interval': 'Monat', 'title': "Monats-Mittelwerte", 'legend':"Monatsmittel",'settings':['parameters','date_from','date_to','show_band','show_guidelines'], 'defaults':{'date_from': datetime.today()-timedelta(365),'date_to':datetime.today(),'show_guidelines':True}, 'occurrence_expr': 'im', 'time_fmt_from_to':'%B %Y', 'time_fmt_occurrence': '%B %Y', 'time_fmt_x_axis': '%b %y' },
+                    'Woche':{'col':'mitte_woche', 'agg_interval': 'Woche', 'title': "Wochen-Mittelwerte", 'legend':"Wochenmittel",'settings':['parameters','date_from','date_to','show_band','show_guidelines'], 'defaults':{'date_from': datetime(self.start_jahr,1,1),'date_to':datetime.today(),'show_guidelines':True}, 'occurrence_expr': 'in Woche', 'time_fmt_from_to':'%B %Y', 'time_fmt_occurrence': '%U %Y', 'time_fmt_x_axis': '%b %y' },
+                    'Tag':{'col':'datum', 'agg_interval': 'Tag', 'title': 'Tages-Mittelwerte', 'legend':f"Tagesmittel",'settings':['parameters','date_from','date_to','show_band','show_guidelines'], 'defaults':{'date_from': datetime.today()-timedelta(days=30),'date_to':datetime.today(),'show_guidelines':True}, 'occurrence_expr': 'in', 'time_fmt_from_to':'%d. %B %Y', 'time_fmt_occurrence': '%d. %B %Y', 'time_fmt_x_axis': '%d.%m.%y' },
+                    'Stunde':{'col':'zeit', 'agg_interval': 'Stunde', 'title': 'Stunden-Mittelwerte', 'legend':"Stundenmittel",'settings':['parameters','date_from','date_to','show_guidelines'], 'defaults':{'date_from': datetime.today()-timedelta(days=30),'date_to':datetime.today(),'show_guidelines':True}, 'occurrence_expr': 'am', 'time_fmt_from_to':'%d. %B', 'time_fmt_occurrence': '%d. %B %Y %H:%M', 'time_fmt_x_axis': '%d.%m.%y' },
                 },
             },
             'barchart': {
@@ -144,7 +145,6 @@ class App:
                 text += " Um die Übersichtlichkeit bei den Extremwerten zu wahren, wurden die stündlichen Messungen zu Tageswerten aggregiert."
             return text 
 
-        
         def prepare_data(df, par):   
             par_title = par.replace('.','')  # remove dot, as it cannot be displayed in aggrid 
             # df['monat'] = df['monat'].replace(config.MONTHS_DICT)
@@ -156,6 +156,7 @@ class App:
                 df = df.rename(columns={par:par_title}).reset_index()
             df = df[[par_title, t_agg['col']]]
             df = df.rename(columns={par: par_title})
+            df['Legende'] = par
             if t_agg['col']=='monat':
                 df = df.replace({'monat': cn.MONTHS_DICT})
             
@@ -163,6 +164,7 @@ class App:
         
         def prepare_plot(df, par, par_title):
             t_agg = t_agg = self.settings['agg_time']
+            self.settings['lines'], legend_colors = self.get_lines(par)
             self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {t_agg['title']}"
             self.settings['tooltip'] = list(df.columns)
             if t_agg['col'] in ['mitte_jahr','mitte_monat','mitte_woche', 'datum','zeit']:
@@ -175,16 +177,23 @@ class App:
                     sort=list(cn.MONTHS_REV_DICT.keys())
                 )
             self.settings['y'] = alt.Y(f"{par_title}:Q")
+            self.settings['color'] = alt.Color('Legende:N', 
+                scale=alt.Scale(range=legend_colors),
+            )
             return df, 
 
         def show_plot(df):
             chart = alt.Chart(df).mark_boxplot().encode(  
                         x=self.settings['x'],
                         y=self.settings['y'],
+                        color=self.settings['color'],
                         tooltip = self.settings['tooltip']
-                    ).properties(width=plot_width, height=plot_height, title=self.settings['plot_title'])
+                    )
             
-            st.altair_chart(chart)
+            if self.settings['show_guidelines']:
+                for line in self.settings['lines']:
+                    chart += line
+            st.altair_chart(chart.properties(width=plot_width, height=plot_height, title=self.settings['plot_title']))
         
         self.get_settings(self.settings['agg_time']['settings'],self.settings['agg_time']['defaults'])
         
@@ -216,7 +225,7 @@ class App:
 
                 avg_val = df['Wert'].mean() 
 
-                text = (f" Der durchschnittliche Wert beträgt {avg_val: .1f}{unit}. Der tiefste Wert von {min_val: .1f}{unit} wurde {get_occurrence_expression(min_time)} gemessen,\n"
+                text = (f" Der durchschnittliche {par}-Wert beträgt {avg_val: .1f}{unit}. Der tiefste Wert von {min_val: .1f}{unit} wurde {get_occurrence_expression(min_time)} gemessen,\n"
                     f" das Maximum von {max_val: .1f}{unit} trat {t_agg['occurrence_expr']} {max_time: {t_agg['time_fmt_occurrence']}} auf.")
                 return text
 
@@ -245,27 +254,8 @@ class App:
             return df, par_title
 
         def prepare_plot(df, par, par_title):
-            def get_lines():
-                lines = []
-                colors = []
-                if self.settings['show_guidelines']:
-                    guidelines = self.df_parameters[par]['guidelines']
-                    # makre sure that e.g. a limit for the daily average is not shown with data averaged yearly as it might suggest
-                    # that things are perfect
-                    for gl in guidelines:
-                        if tools.is_valid_timeagg(gl["time_agg_field"], self.settings['agg_time']['col']):
-                            overlay = pd.DataFrame({'y': [gl['value']], 'Legende': [gl['legend']]})
-                            line = alt.Chart(overlay).mark_rule(strokeWidth=2).encode(
-                                    y="y", 
-                                    color=alt.Color("Legende:N")
-                            )
-                            lines.append(line)
-                            colors.append(gl['color'])
-                    colors.append('steelblue')
-                return lines, colors
-
             t_agg = self.settings['agg_time']
-            self.settings['lines'], legend_colors = get_lines()
+            self.settings['lines'], legend_colors = self.get_lines(par)
             self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {t_agg['title']}"
             self.settings['tooltip'] = list(df.columns)
             self.settings['tooltip'] = [alt.Tooltip(f"{t_agg['col']}:T", format=t_agg['time_fmt_occurrence']), alt.Tooltip('Wert:Q', format='.1f')]
@@ -406,12 +396,11 @@ class App:
                 y=self.settings['y'], 
                 color = self.settings['color'], 
                 tooltip = self.settings['tooltip'],
-            ).properties(width=plot_width,height=plot_height,title=self.settings['plot_title'])
-            
+            )
             if self.settings['show_guidelines']:
                 for line in self.settings['lines']:
                     chart += line
-            st.altair_chart(chart)  #.resolve_scale(color='independent') 
+            st.altair_chart(chart.properties(width=plot_width,height=plot_height,title=self.settings['plot_title']))  #.resolve_scale(color='independent') 
 
         self.get_settings(self.settings['agg_time']['settings'],self.settings['agg_time']['defaults'])
         
