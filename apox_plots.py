@@ -1,13 +1,11 @@
-from os import supports_follow_symlinks
+#from os import supports_follow_symlinks
 import streamlit as st
 from st_aggrid import AgGrid
 import pandas as pd
 import numpy as np
 import altair as alt
-import calendar
-from pandas._libs.tslibs.timestamps import Timestamp
+# from pandas._libs.tslibs.timestamps import Timestamp
 
-from queries import qry
 import config
 from st_aggrid import AgGrid
 from datetime import datetime, timedelta
@@ -104,7 +102,7 @@ class App:
         self.settings['show_band'] = False
         for x in required_options:
             if x == 'parameters':
-                self.settings['parameters'] = st.sidebar.multiselect("Parameters", options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
+                self.settings['parameters'] = st.sidebar.multiselect("Parameter", options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
             if x == 'years':
                 self.settings['years'] = st.sidebar.slider('🔍Jahr', self.start_jahr, self.end_jahr, defaults['years'])
             if x == 'date_from':

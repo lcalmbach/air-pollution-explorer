@@ -17,10 +17,10 @@ from datetime import datetime, timedelta
 import config
 import tools
 
-__version__ = '0.0.3' 
+__version__ = '0.0.4' 
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
-VERSION_DATE = '2021-07-17'
+VERSION_DATE = '2021-07-18'
 my_name = '🌎Luft-Qualität-Explorer-BS'
 my_kuerzel = "lqx.bs"
 GIT_REPO = 'https://github.com/lcalmbach/air-pollution-explorer'
@@ -71,7 +71,7 @@ def get_data():
     def synch_local_data(df):
         def get_url():
             """
-            Builds the url string for the OGD.bs RESTAPI. unfortunatley the dataset contains data until 2050, so you cannot calculate from the 
+            Builds the url string for the OGD.bs REST-API. unfortunatley the dataset contains data until 2050, so you cannot calculate from the 
             most recent records backwards. Therefore the most recent record in the local dataframe is taken, then the number of hour difference
             from now is calculated and the respective number of hours = records calculated. not sure why the api contains the from and to dates
             as well as the number of records, since that makes the system overdetermined, but wit works

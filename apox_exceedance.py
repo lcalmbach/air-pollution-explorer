@@ -1,12 +1,4 @@
 import streamlit as st
-from st_aggrid import AgGrid
-import pandas as pd
-import numpy as np
-from st_aggrid import AgGrid
-
-from queries import qry
-#import tools
-import config
 import tools
 
 min_number_months_measured = 8
@@ -172,7 +164,7 @@ class App:
     def show_menu(self):
         _station_id = st.sidebar.selectbox('Station', list(self.dic_stations.keys()),
             format_func=lambda x: self.dic_stations[x])    
-        self.parameters = st.sidebar.multiselect("Parameters",options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
+        self.parameters = st.sidebar.multiselect("Parameter",options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
         self.settings['years'] = st.sidebar.slider('Jahr', self.start_jahr, self.end_jahr, (self.start_jahr, self.end_jahr))
         df = self.filter_data()
         self.show_exceedance(df)

@@ -4,8 +4,6 @@ import pandas as pd
 import numpy as np
 from st_aggrid import AgGrid
 
-from queries import qry
-#import tools
 import config
 import tools
 
@@ -98,7 +96,7 @@ class App:
         self.station = self.df_stations.loc[_station_id]
         type_options = ['nach Jahr', 'nach Monat', 'nach Tag']
         self.stat_type = st.sidebar.selectbox("Statistik", options=type_options)
-        self.parameters = st.sidebar.multiselect("Parameters",options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
+        self.parameters = st.sidebar.multiselect("Parameter",options = list(self.df_parameters.columns), default=list(self.df_parameters.columns))
         
         if self.stat_type == 'nach Jahr':
             self.show_yearly_stats()
