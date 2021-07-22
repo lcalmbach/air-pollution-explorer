@@ -14,15 +14,24 @@ class App:
         self.df_data = df_data
         self.df_stations = df_stations
         self.df_parameters = df_parameters
-    
+
     def show_about(self):
+        def get_current_values_list():
+            text = ''
+            rec = self.df_data.sort_values(by='zeit',ascending=False).head(1)
+            rec.rename(columns={rec.columns[0]:'value'})
+            for par in self.df_parameters:
+                text += f"- **{par}**: {rec.iloc[0][par] :.1f}{self.df_parameters[par]['unit']} \n"
+            return text
+
         stations = len(self.df_stations)
         year_from = self.df_data['jahr'].min()
         year_to = self.df_data['jahr'].max()
         most_current_record = self.df_data['zeit'].max().strftime('%d.%m.%Y %H:%M')
         now_as_CET = datetime.now(tz=config.tz_GMT).strftime('%d.%m.%Y %H:%M')
+        current_values = get_current_values_list()
         with open('./intro.md', encoding='UTF8') as f:
-            st.markdown(f.read().format(stations, year_from, year_to, most_current_record, now_as_CET))   
+            st.markdown(f.read().format(stations, year_from, year_to, most_current_record, now_as_CET, current_values))   
         
     def show_stations(self):
         text = ""

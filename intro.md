@@ -3,6 +3,8 @@ Die [Open Government Data Plattform](https://data.bs.ch) des Kantons Basel stell
 
 Zur Zeit stehen Daten von {0} Stationen für die Jahre {1} bis {2} zur Verfügung. Neuster Record ist {3}. Alle Zeitangaben werden als Standard Central-Europe-Time (CET) ausgegeben, um Probleme der Zeitreihe beim Wechsel zur Sommerzeit zu vermeiden. Die aktuelle CET-Zeit ist: {4}.
 
+### Aktuelle Werte
+{5}
 ### Datenquellen und Ressouren
 - [Open Government Data Basel (Datenquelle)](https://www.opendata.bs.ch/)
 - [Lufthygieneamt beider Basel](https://www.baselland.ch/politik-und-behorden/direktionen/bau-und-umweltschutzdirektion/lufthygiene)

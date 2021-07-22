@@ -192,19 +192,21 @@ class App:
                 for line in self.settings['lines']:
                     chart += line
             st.altair_chart(chart.properties(width=plot_width, height=plot_height, title=self.settings['plot_title']))
-        
+
+
         self.get_settings(self.settings['agg_time']['settings'],self.settings['agg_time']['defaults'])
-        
         for par in self.settings['parameters']:
             df = self.filter_data()
             df, par_title = prepare_data(df, par)
-            prepare_plot(df, par, par_title)
-            show_plot(df)
-            st.markdown(get_text(df, par, par_title))
-            with st.beta_expander('Data'):
-                AgGrid(df)
-                st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
-
+            if len(df)>0:
+                prepare_plot(df, par, par_title)
+                show_plot(df)
+                st.markdown(get_text(df, par, par_title))
+                with st.beta_expander('Data'):
+                    AgGrid(df)
+                    st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
+            else:
+                st.warning("Es wurden mit den Filtereinstellungen keine Werte gefunden")
 
     def show_linechart(self):  
         def get_text(df, par):
@@ -296,19 +298,23 @@ class App:
                 for line in self.settings['lines']:
                     chart += line
             st.altair_chart(chart)
-        
+            
 
         self.get_settings(self.settings['agg_time']['settings'], self.settings['agg_time']['defaults'])
         
         for par in self.settings['parameters']:
             df = self.filter_data()
             df, par_title = prepare_data(df, par)
-            prepare_plot(df, par, par_title)
-            show_plot(df)
-            st.markdown(get_text(df,par))
-            with st.beta_expander('Data'):
-                AgGrid(df)
-                st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
+            if len(df)>0:    
+                prepare_plot(df, par, par_title)
+                show_plot(df)
+                st.markdown(get_text(df,par))
+                with st.beta_expander('Data'):
+                    AgGrid(df)
+                    st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
+            else:
+                st.warning("Es wurden mit den Filtereinstellungen keine Werte gefunden")
+
 
 
     def show_barchart(self):
@@ -405,12 +411,15 @@ class App:
         for par in self.settings['parameters']:
             df = self.filter_data()
             df, par_title = prepare_data(df, par)
-            prepare_plot(df, par, par_title)
-            show_plot(df)
-            st.markdown(get_text(df,par, par_title))
-            with st.beta_expander('Data'):
-                AgGrid(df)
-                st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
+            if len(df)>0:
+                prepare_plot(df, par, par_title)
+                show_plot(df)
+                st.markdown(get_text(df,par, par_title))
+                with st.beta_expander('Data'):
+                    AgGrid(df)
+                    st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
+            else:
+                st.warning("Es wurden mit den Filtereinstellungen keine Werte gefunden")
 
 
     def show_heatmap(self):
@@ -484,12 +493,15 @@ class App:
         for par in self.settings['parameters']:
             df = self.filter_data()
             df, par_title = prepare_data(df, par)
-            prepare_plot(df, par, par_title)
-            show_plot(df)
-            st.markdown(get_text(df,par, par_title))
-            with st.beta_expander('Data'):
-                AgGrid(df)
-                st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
+            if len(df) > 0:
+                prepare_plot(df, par, par_title)
+                show_plot(df)
+                st.markdown(get_text(df,par, par_title))
+                with st.beta_expander('Data'):
+                    AgGrid(df)
+                    st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
+            else:
+                st.warning("Es wurden mit den Filtereinstellungen keine Werte gefunden")
 
 
     def show_menu(self):
@@ -513,6 +525,3 @@ class App:
             self.show_boxplot()
         elif _plot_type == 'heatmap':
             self.show_heatmap()
-
-        
-    
