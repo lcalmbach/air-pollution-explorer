@@ -12,6 +12,7 @@ import apox_stats
 import apox_info
 import apox_plots
 import apox_exceedance
+import apox_fireworks
 import config as cn
 from datetime import datetime, timedelta
 import config
@@ -30,7 +31,12 @@ APP_INFO = f"""<div style="background-color:powderblue; padding: 10px;border-rad
     version: {__version__} ({VERSION_DATE})<br>
     <a href="{GIT_REPO}">git-repo</a>
     """
-MENU_DIC = {apox_info: 'Info', apox_stats: 'Statistiken', apox_plots: 'Grafiken', apox_exceedance:'Grenzwert Überschreitungen'}
+MENU_DIC = {apox_info: 'Info', 
+    apox_stats: 'Statistiken', 
+    apox_plots: 'Grafiken', 
+    apox_exceedance:'Grenzwert Überschreitungen',
+    apox_fireworks:'Feuerwerke und Feinstaub'
+}
 LOGGING_LEVEL = logging.ERROR
 logging.basicConfig(format='%(levelname) %(asctime)s %(message)s', level=LOGGING_LEVEL)
 
