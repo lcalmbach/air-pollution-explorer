@@ -104,7 +104,7 @@ class App:
         
 
     def show_firework_effects(self):
-        st.image('./images/feuerwerk.jpg', caption=None, width=None, use_column_width='auto', clamp=False, channels='RGB', output_format='auto')
+        st.image('./images/feuerwerk_bs.jpg', caption=None, width=None, use_column_width='auto', clamp=False, channels='RGB', output_format='auto')
         st.markdown('[Quelle Abbildung](https://www.bs.ch/bilddatenbank#tree=7195)')
 
         text = """Feuerwerke erzeugen Rauch und damit Feinstaub. Die resultierende Zunahme der PM10 und PM2.5 Konzentrationen lassen sich in der basler Luft in den meisten Jahren gut 
