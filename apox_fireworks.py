@@ -99,7 +99,7 @@ class App:
         format_func=lambda x: self.dic_stations[x])    
         self.station = self.df_stations.loc[_station_id]
         self.settings['t_agg'] = st.sidebar.selectbox('zeitliche Auflösung', ['Stundenwerte', 'Tagesmittel'])
-        self.settings['years'] = st.sidebar.multiselect('Jahre',options= range(self.start_jahr, self.end_jahr), default = range(self.start_jahr, self.end_jahr) )
+        self.settings['years'] = st.sidebar.multiselect('Jahre', options= range(self.start_jahr, self.end_jahr + 1), default = range(self.start_jahr, self.end_jahr + 1) )
         self.settings['interval'] = st.sidebar.number_input('Zeitfenster in Tagen', self.settings['interval'])
         
 
@@ -113,7 +113,7 @@ erhöhter Basiskonzentration der Schadstoffe, zur Überschreitung des Tagesmitte
 der Fall. Gut unterscheiden lassen sich am Nationalfeiertag auch das Feuerwerk der Stadt Basel, welches am 30. Juli gezündet wird und die privaten Feuerwerke, die am Abend des 1. August stattfinden und eine zwar tiefere, aber länger 
 andauernde Feinstaub-Spitze verursachen.
 
-In verschiedenen Jahren treten keine prominente Spitzenwerte auf, da wegen der herrschenden Windrichtung die Schadstoffwolke nicht in Richtung Messtation geblasen wurde, oder wenn das 
+In verschiedenen Jahren treten keine ausgeprägten Spitzenwerte auf, da wegen der herrschenden Windrichtung die Schadstoffwolke nicht in Richtung Messtation geblasen wurde, oder wenn das 
 Feuerwerk abgesagt wurde, zum Beispiel in 2018 (Trockenheit-bedingt) oder im 2020 (Covid-19 bedingt). 
 
 Wichtiger als die Spitze selbst ist die Fläche unter der Spitze, d.h. wie lange die Rauchwolke über der Stadt gehangen ist: Kurze hohe Spitzen können den Tagesmittelwert weniger stark beeinflussen 

@@ -18,10 +18,10 @@ from datetime import datetime, timedelta
 import config
 import tools
 
-__version__ = '0.0.6' 
+__version__ = '0.0.7' 
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
-VERSION_DATE = '2021-07-23'
+VERSION_DATE = '2021-08-01'
 my_name = '🌎Luft-Qualität-Explorer-BS'
 my_kuerzel = "lqx.bs"
 GIT_REPO = 'https://github.com/lcalmbach/air-pollution-explorer'
