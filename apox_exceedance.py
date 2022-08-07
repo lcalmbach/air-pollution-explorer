@@ -14,9 +14,7 @@ class App:
         self.station = {}
         self.df_parameters = df_parameters
 
-        self.start_jahr =  int(self.df_data['jahr'].min() + 1)
-        self.end_jahr = int(self.df_data['jahr'].max())
-        self.start_jahr =  int(self.df_data['jahr'].min() + 1)
+        self.start_jahr =  int(self.df_data['jahr'].min())
         self.end_jahr = int(self.df_data['jahr'].max())
         self.settings = {}
     
@@ -41,15 +39,21 @@ class App:
         df = df.groupby(['jahr','monat'])[par].agg(['count'])
         df = df[df['count']>0].reset_index()
         df = df.groupby(['jahr'])['count'].agg(['count']).reset_index()
-        df = df[df['count']>min_number_months_measured].reset_index()
-        return (df['jahr'].unique().tolist())
+        
+        df = df[df['count'] > min_number_months_measured].reset_index()
+        return(df['jahr'].unique().tolist())
 
 
     def analyse_exceedances(self, gl, par, df):
         def analyse_year(df):
             def get_text():
-                text = f"""In den Jahren {self.settings['years'][0]} bis {self.settings['years'][1]} wurde der Grenzwert für 
-                {par['name_long']} in {len(df)} Jahren überschritten. Überschreitungen des Jahresgrenzwerts werden nur in Jahren ausgewiesen,
+                first_value = df['jahr'].min()
+                last_value = df['jahr'].max()
+                min_year = first_value if first_value > self.settings['years'][0] else self.settings['years'][0]
+                max_year = last_value if last_value < self.settings['years'][1] else self.settings['years'][1]
+                years = len(df[df['exceedance'] > 0])
+                text = f"""In den Jahren {min_year} bis {max_year} wurde der Grenzwert für 
+                {par['name_long']} in {years} Jahren überschritten. Überschreitungen des Jahresgrenzwerts werden nur in Jahren ausgewiesen,
                 in welchen während mindestestens {min_number_months_measured} Monaten gemessen wurde."""
                 return text
             
@@ -62,24 +66,35 @@ class App:
                 return cols
 
             df = df.groupby([gl['time_agg_field']])[par['name_short']].agg(['mean', 'count']).reset_index()
-            df = df[df[gl['time_agg_field']].isin(self.get_years_with_monthly_data(self.df_data, par['name_short']))]
+            years_with_monthly_data = self.get_years_with_monthly_data(self.df_data, par['name_short'])
+            df = df[df[gl['time_agg_field']].isin(years_with_monthly_data)]
             df['exceedance'] = df['mean'] - gl['value']
+            figure_text = get_text()
             df = df[df['exceedance'] > 0]
             df = df.rename(columns={'jahr':'Jahr', 'mean': 'Mittelwert', 'count': 'Anzahl Messungen', 'exceedance': 'Abweichung vom Grenzwert'} )
             
-            return df, get_cols(), get_text()
+            return df, get_cols(), figure_text
 
         def analyse_day(df):
             def get_text():
-                if gl['max_exceedances'] > 0:
-                    col = f"Anz<{gl['value']}"
-                    no_exceedance = len(df[df[col]>gl['max_exceedances']])
-                    allowed_exceedances = f"""Pro Jahr darf der Grenzwert ({gl['value']}{par['unit']}) höchstens {gl['max_exceedances']} mal überschritten werden. Dieser 
-                    Wert wurde in {no_exceedance} von {len(df)} Jahren überschritten."""
+                first_value = df['jahr_'].min()
+                last_value = df['jahr_'].max()
+                min_year = first_value if first_value > self.settings['years'][0] else self.settings['years'][0]
+                max_year = last_value if last_value < self.settings['years'][1] else self.settings['years'][1]
+                years = last_value - first_value + 1
+                max_exceedance_year_record = df.nlargest(1, columns=['is_exceedance_sum'])
+                max_exceedance_year = max_exceedance_year_record.iloc[0]['jahr_']
+                max_exceedances = max_exceedance_year_record.iloc[0]['is_exceedance_sum']
+                if 'max_exceedances' in gl:
+                    no_exceedance = len(df[df['is_exceedance_sum'] > gl['max_exceedances']])
+                    allowed_exceedances = f"""Pro Jahr darf der Grenzwert ({gl['value']}{par['unit']}) höchstens {gl['max_exceedances']} Mal überschritten werden. Dieser 
+                    Wert wurde in {no_exceedance} von {years} Jahren überschritten. Am meisten Überschreitungen ({max_exceedances:,.0f}) gab es im Jahr {max_exceedance_year:.0f}."""
                 else:
+                    no_exceedance = len(df[df['is_exceedance_sum'] > 1])
                     allowed_exceedances = ""
-                text = f"""In den Jahren {self.settings['years'][0]} bis {self.settings['years'][1]} wurde der Grenzwert für 
-                {par['name_long']} in {len(df)} Tagen überschritten. {allowed_exceedances}"""
+                
+                text = f"""In den Jahren {min_year} bis {max_year} wurde der Grenzwert für 
+                    {par['name_long']} in {no_exceedance} Jahren überschritten. {allowed_exceedances}"""
                 return text
 
             def get_cols():
@@ -98,9 +113,12 @@ class App:
             df = df.groupby(['jahr'])['exceedance','no_exceedance','is_exceedance',].agg(['sum']).reset_index()
             df['pct_exceedances'] = df['is_exceedance'] / (df['no_exceedance'] + df['is_exceedance']) * 100
             df.columns = df.columns.map('_'.join)
+            figure_text = get_text()
+            df = df[df['is_exceedance_sum'] > gl['max_exceedances']]
             df = df.rename(columns={'jahr_':'Jahr', 'no_exceedance_sum': f"Anz<{gl['value']}", 'is_exceedance_sum': f"Anz>={gl['value']}", 'pct_exceedances_':'Überschreitungen(%)'} )
             df = df[['Jahr', f"Anz<{gl['value']}", f"Anz>={gl['value']}",'Überschreitungen(%)']]
-            return df, get_cols(), get_text()
+            
+            return df, get_cols(), figure_text
 
         def analyse_hour(df):
             def get_text():
@@ -108,7 +126,7 @@ class App:
                     col = f"Anz>={gl['value']}"
                     exceedances_hours = df[col].sum()
                     no_exceedance = len(df[df[col]>gl['max_exceedances']])
-                    allowed_exceedances = f"""Pro Jahr darf der Grenzwert höchstens {gl['max_exceedances']} mal überschritten werden. Der 
+                    allowed_exceedances = f"""Pro Jahr darf der Grenzwert höchstens {gl['max_exceedances']} Mal überschritten werden. Der 
                     Grenzwert wurde in {no_exceedance} von {len(df)} Jahren überschritten."""
                 else:
                     allowed_exceedances = ""
@@ -135,8 +153,7 @@ class App:
             df = df.rename(columns={'jahr_':'Jahr', 'no_exceedance_sum': f"Anz<{gl['value']}", 'is_exceedance_sum': f"Anz>={gl['value']}", 'pct_exceedances_':'Überschreitungen(%)'} )
             df = df[['Jahr', f"Anz<{gl['value']}", f"Anz>={gl['value']}",'Überschreitungen(%)']]
             return df, get_cols(), get_text()
-
-        st.markdown(f"### Grenzwert: {gl['legend']} für {par['name_long']}: {gl['value']}")
+        st.markdown(f"#### Überschreitungen: {gl['legend']} für {par['name_long']}: {gl['value']} {par['unit']}")
         if gl['time_agg_field'] == 'jahr':
             df, cols, text = analyse_year(df)
         elif gl['time_agg_field'] == 'datum':
@@ -145,13 +162,13 @@ class App:
             df, cols, text  = analyse_hour(df)
         
         if len(df)>0:
-            col1, col2 = st.beta_columns(2)
+            col1, col2 = st.columns(2)
             with col1:
                 tools.show_table(df, cols, tools.get_table_settings(df))
             with col2:
                 st.markdown(text)
         else:
-            st.markdown (text)
+            st.markdown(text)
         
 
     def show_exceedance(self, df):

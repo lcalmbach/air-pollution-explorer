@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 import config
 import tools
 
-__version__ = '0.0.7' 
+__version__ = '0.0.8' 
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
 VERSION_DATE = '2021-08-01'
@@ -31,11 +31,11 @@ APP_INFO = f"""<div style="background-color:powderblue; padding: 10px;border-rad
     version: {__version__} ({VERSION_DATE})<br>
     <a href="{GIT_REPO}">git-repo</a>
     """
-MENU_DIC = {apox_info: 'Info', 
-    apox_stats: 'Statistiken', 
-    apox_plots: 'Grafiken', 
-    apox_exceedance:'Grenzwert Überschreitungen',
-    apox_fireworks:'Feuerwerke und Feinstaub'
+MENU_DIC = {'Info': apox_info , 
+    'Statistiken': apox_stats, 
+    'Grafiken': apox_plots, 
+    'Grenzwert Überschreitungen': apox_exceedance,
+    'Feuerwerke und Feinstaub': apox_fireworks
 }
 LOGGING_LEVEL = logging.ERROR
 logging.basicConfig(format='%(levelname) %(asctime)s %(message)s', level=LOGGING_LEVEL)
@@ -49,7 +49,7 @@ def init():
         page_icon='🌎',  # String, anything supported by st.image, or None.
     )
 
-# @st.cache(allow_output_mutation=True)
+@st.cache(allow_output_mutation=True)
 def get_data():
     def get_most_recent_record(df):
         """
@@ -157,16 +157,14 @@ def get_data():
 def main():
     init()
     st.sidebar.markdown(f"## {my_name}")
-    app = st.sidebar.selectbox("Menu", options=list(MENU_DIC.keys()),
-        format_func=lambda x: MENU_DIC[x])
+    app = MENU_DIC[st.sidebar.selectbox("Menu", options=list(MENU_DIC.keys()))]
     #app.show_menu()
     df_data, df_stations, df_parameters = get_data()
 
     app = app.App(df_data.copy(deep=True), df_stations.copy(deep=True), df_parameters.copy(deep=True))
     app.show_menu()
     header_html = "<a href = 'https://lcalmbach.github.io/lqx-help/' target = '_blank'><img src='data:image/png;base64,{}' class='img-fluid' style='width:45px;height:45px;'></a><br>".format(
-    tools.get_base64_encoded_image("./images/help2.jpg")
-    )
+        tools.get_base64_encoded_image("./images/help2.jpg"))
     st.sidebar.markdown(
         header_html, unsafe_allow_html=True,
     )

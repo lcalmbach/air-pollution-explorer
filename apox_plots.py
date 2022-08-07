@@ -2,7 +2,6 @@
 import streamlit as st
 from st_aggrid import AgGrid
 import pandas as pd
-import numpy as np
 import altair as alt
 # from pandas._libs.tslibs.timestamps import Timestamp
 
@@ -78,9 +77,9 @@ class App:
         plot_keys = [x for x in self.plot_type_def.keys()]
         self.plot_type_options = dict(zip(plot_keys, plot_legends))
     
-    def filter_data(self):
+    def filter_data(self,par):
         df = self.df_data
-
+        df = df.dropna(subset=[par])
         if 'date_from' in self.settings:
             start_series = self.df_data['datum'].min().to_pydatetime().date()
             end_series = self.df_data['datum'].max().to_pydatetime().date()
@@ -196,13 +195,13 @@ class App:
 
         self.get_settings(self.settings['agg_time']['settings'],self.settings['agg_time']['defaults'])
         for par in self.settings['parameters']:
-            df = self.filter_data()
+            df = self.filter_data(par)
             df, par_title = prepare_data(df, par)
             if len(df)>0:
                 prepare_plot(df, par, par_title)
                 show_plot(df)
                 st.markdown(get_text(df, par, par_title))
-                with st.beta_expander('Data'):
+                with st.expander('Data'):
                     AgGrid(df)
                     st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
             else:
@@ -303,13 +302,13 @@ class App:
         self.get_settings(self.settings['agg_time']['settings'], self.settings['agg_time']['defaults'])
         
         for par in self.settings['parameters']:
-            df = self.filter_data()
+            df = self.filter_data(par)
             df, par_title = prepare_data(df, par)
             if len(df)>0:    
                 prepare_plot(df, par, par_title)
                 show_plot(df)
                 st.markdown(get_text(df,par))
-                with st.beta_expander('Data'):
+                with st.expander('Data'):
                     AgGrid(df)
                     st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
             else:
@@ -409,13 +408,13 @@ class App:
         self.get_settings(self.settings['agg_time']['settings'],self.settings['agg_time']['defaults'])
         
         for par in self.settings['parameters']:
-            df = self.filter_data()
+            df = self.filter_data(par)
             df, par_title = prepare_data(df, par)
             if len(df)>0:
                 prepare_plot(df, par, par_title)
                 show_plot(df)
                 st.markdown(get_text(df,par, par_title))
-                with st.beta_expander('Data'):
+                with st.expander('Data'):
                     AgGrid(df)
                     st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
             else:
@@ -433,6 +432,7 @@ class App:
                 min_val = df[par_title].min()
                 rec = df[df[par_title]==min_val]
                 t_agg = self.settings['agg_time']
+
                 min_time = rec[t_agg['col']].iloc[0]
 
                 max_val = df[par_title].max()
@@ -491,17 +491,17 @@ class App:
         
         self.get_settings(self.settings['agg_time']['settings'],self.settings['agg_time']['defaults'])
         for par in self.settings['parameters']:
-            df = self.filter_data()
+            df = self.filter_data(par)
             df, par_title = prepare_data(df, par)
             if len(df) > 0:
                 prepare_plot(df, par, par_title)
                 show_plot(df)
                 st.markdown(get_text(df,par, par_title))
-                with st.beta_expander('Data'):
+                with st.expander('Data'):
                     AgGrid(df)
                     st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
             else:
-                st.warning("Es wurden mit den Filtereinstellungen keine Werte gefunden")
+                st.warning(f"Für {par} wurde mit diesen Filtereinstellungen keine Werte gefunden")
 
 
     def show_menu(self):

@@ -56,6 +56,3 @@ class App:
             self.show_parameters()
         elif menu =='Stationen':
             self.show_stations()
-
-        
-    
