@@ -1,2 +1,2 @@
-streamlit==0.83.0
-streamlit-aggrid==0.1.9
+streamlit>=1.11.1
+streamlit-aggrid>=0.1.9
