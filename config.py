@@ -1,5 +1,7 @@
 import pytz
 
+DATA_FILE = './data/100049.gzip'
+
 ABOUT_APP_TEXT = """This app has been developed by [Lukas Calmbach](mailto:lcalmbach@gmail.com) using 
         [Python](https://www.python.org/), [Streamlit](https://streamlit.io/) and [Altair]
         (https://altair-viz.github.io/). All sourcecode is published on [github](https://github.com/lcalmbach/ede).

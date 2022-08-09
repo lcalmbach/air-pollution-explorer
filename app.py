@@ -49,7 +49,7 @@ def init():
         page_icon='🌎',  # String, anything supported by st.image, or None.
     )
 
-@st.cache(allow_output_mutation=True)
+# @st.cache(allow_output_mutation=True)
 def get_data():
     def get_most_recent_record(df):
         """
@@ -68,8 +68,9 @@ def get_data():
         """
         
         most_recent_record = get_most_recent_record(df)
+        #st.write(most_recent_record)
         diff = datetime.now(tz=config.tz_GMT) - most_recent_record
-        result = (diff < timedelta(hours = 2))
+        result = (diff < timedelta(hours = 1))
         logging.info(f'timediff is {diff}, data_is_up_to_date = {result}')
         return 
     
@@ -108,11 +109,13 @@ def get_data():
             if 'pm2_5_stundenmittelwerte_ug_m3' in (df_ogd.columns):
                 df_ogd = df_ogd[df_ogd['pm2_5_stundenmittelwerte_ug_m3'] > 0]
                 df_ogd.rename(columns = {'datum_zeit':'zeit', 
-                    'pm10_stundenmittelwerte_ug_m3': 'PM10', 
-                    'pm2_5_stundenmittelwerte_ug_m3': 'PM2.5',
-                    'o3_stundenmittelwerte_ug_m3': 'O3'}
+                    'pm10_stundenmittelwerte_ug_m3': 'pm10', 
+                    'pm2_5_stundenmittelwerte_ug_m3': 'pm2_5',
+                    'o3_stundenmittelwerte_ug_m3': 'o3',
+                    'no2_stundenmittelwerte_ug_m3': 'nox'
+                    }
                     , inplace=True)
-                df_ogd = df_ogd[['zeit','PM10','PM2.5','O3']]
+                df_ogd = df_ogd[['zeit','pm10','pm2_5','o3','nox']]
                 df_ogd['zeit'] = pd.to_datetime(df_ogd['zeit'])
                 # make sure there are no duplicate records
                 df_ogd = df_ogd[df_ogd['zeit'] > get_most_recent_record(df)]
@@ -129,7 +132,7 @@ def get_data():
         if len(df_ogd) > 0:
             df = df.append(df_ogd)
             try:
-                df.to_parquet('./data/apox_data.pq')
+                df.to_parquet(config.DATA_FILE, compression='gzip')
                 logging.info(f'die neusten Daten wurden in apox_data.pq gespeichert')
             except:
                 st.warning('Die neusten Daten konnten nicht gespeichert werden')
@@ -138,13 +141,13 @@ def get_data():
         return df 
     
     def get_local_data():
-        df_data = pd.read_parquet('./data/apox_data.pq')
+        df_data = pd.read_parquet(config.DATA_FILE)
         df_stations = pd.read_json('./data/stations.json')
         df_parameters = pd.read_json('./data/parameters.json')
         df_stations.set_index("id", inplace=True)
         # PM2.5 was measured since 2017 only, a few ghost records exists since 2003
         df_data['jahr'] = df_data['zeit'].dt.year    
-        df_data['PM2.5'] = np.where(df_data['jahr'] > 2016, df_data['PM2.5'], np.nan)
+        df_data['pm2_5'] = np.where(df_data['jahr'] > 2016, df_data['pm2_5'], np.nan)
         logging.info(f'data was read from local files')
         return df_data, df_stations, df_parameters
     

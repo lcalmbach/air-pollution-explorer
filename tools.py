@@ -175,14 +175,14 @@ def get_table_settings(df:pd.DataFrame):
     row_height = 40
     max_height = 400
 
+    result = {'height':400 }
     if len(df) > 0:
         height = (len(df) + 1) * row_height
         
         if height > max_height:
             height = max_height
-        return {"width":"50%",'height':height }
-    else:
-        return {}
+        result = {'height':height }
+    return result
 
 def show_table(df: pd.DataFrame, cols, settings):
     gb = GridOptionsBuilder.from_dataframe(df)
@@ -198,7 +198,6 @@ def show_table(df: pd.DataFrame, cols, settings):
         df, 
         gridOptions=gridOptions,
         height=settings['height'], 
-        width=settings['width'], 
         data_return_mode=DataReturnMode.FILTERED_AND_SORTED, 
         update_mode=GridUpdateMode.VALUE_CHANGED,
         fit_columns_on_grid_load=False,

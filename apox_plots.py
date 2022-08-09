@@ -28,8 +28,9 @@ class App:
         self.dic_stations = df_stations['name'].to_dict()
         self.station = {}
         self.lst_parameters = list(df_parameters.columns)
-        self.start_jahr =  int(self.df_data['jahr'].min() + 1)
+        self.start_jahr =  int(self.df_data['jahr'].min())
         self.end_jahr = int(self.df_data['jahr'].max())
+        self.min_date = self.df_data['zeit'].min()
         self.settings = {}
             
         self.plot_type_def =  {
@@ -105,8 +106,8 @@ class App:
             if x == 'years':
                 self.settings['years'] = st.sidebar.slider('🔍Jahr', self.start_jahr, self.end_jahr, defaults['years'])
             if x == 'date_from':
-                self.settings['date_from'] = st.sidebar.date_input('Von Datum', min_value=datetime(2003,1,1), max_value=datetime.now(), value=defaults['date_from'])
-                self.settings['date_to'] = st.sidebar.date_input('Bis Datum', min_value=datetime(2003,1,1), max_value=datetime.now(), value=defaults['date_to'])
+                self.settings['date_from'] = st.sidebar.date_input('Von Datum', min_value=self.min_date, max_value=datetime.now(), value=defaults['date_from'])
+                self.settings['date_to'] = st.sidebar.date_input('Bis Datum', min_value=self.min_date, max_value=datetime.now(), value=defaults['date_to'])
             if x == 'show_band':
                 self.settings['show_band'] = st.sidebar.checkbox("Zeige 90% Fläche")
             if x == 'show_guidelines':
@@ -134,10 +135,10 @@ class App:
     def show_boxplot(self):  
         def get_text(df, par, par_title):
             t_agg = t_agg = self.settings['agg_time']
-            text = f"Diese Figur zeigt Boxplots von {par} von {self.settings['years'][0]} bis {self.settings['years'][1]}. "\
-                f" die Werte sind nach {t_agg['agg_interval']} aggregiert. Jede Box zeigt die Verteilung von 50% der Daten (25. - 75. Perzentil). Die Ausgezogenen Linien repräsentieren je "\
-                "1.5 * die Standardabweichung, was zirka 99% aller Merkmalswerte entspricht. Alle Werte, die ausserhalb dieses Intervalls fallen, werden als Extremwerte bezeichnet und sind "\
-                "als individuelle Symbole (offene Kreise) geplottet."
+            text = f"""Diese Figur zeigt Boxplots von {self.df_parameters[par]['name_long']} von {self.settings['years'][0]} bis {self.settings['years'][1]}.
+                die Werte sind nach {t_agg['agg_interval']} aggregiert. Jede Box zeigt die Verteilung von 50% der Daten (25. - 75. Perzentil) um den Median. Die ausgezogenen Linien repräsentieren je 
+                1.5 * die Standardabweichung, was zirka 99% aller Merkmalswerte entspricht. Alle Werte, die ausserhalb dieses Intervalls fallen, werden als Extremwerte bezeichnet und sind 
+                als individuelle Symbole (offene Kreise) geplottet."""
             if t_agg['base_values_agg'] != None:
                 text += " Um die Übersichtlichkeit bei den Extremwerten zu wahren, wurden die stündlichen Messungen zu Tageswerten aggregiert."
             return text 
@@ -162,7 +163,7 @@ class App:
         def prepare_plot(df, par, par_title):
             t_agg = t_agg = self.settings['agg_time']
             self.settings['lines'], legend_colors = self.get_lines(par)
-            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {t_agg['title']}"
+            self.settings['plot_title'] = f"{self.df_parameters[par]['name_long']} an Station {self.station['name']}: {t_agg['title']}"
             self.settings['tooltip'] = list(df.columns)
             if t_agg['col'] in ['mitte_jahr','mitte_monat','mitte_woche', 'datum','zeit']:
                 self.settings['x'] = alt.X(f"{t_agg['col']}:T", 
@@ -193,7 +194,7 @@ class App:
             st.altair_chart(chart.properties(width=plot_width, height=plot_height, title=self.settings['plot_title']))
 
 
-        self.get_settings(self.settings['agg_time']['settings'],self.settings['agg_time']['defaults'])
+        self.get_settings(self.settings['agg_time']['settings'], self.settings['agg_time']['defaults'])
         for par in self.settings['parameters']:
             df = self.filter_data(par)
             df, par_title = prepare_data(df, par)
@@ -224,7 +225,7 @@ class App:
 
                 avg_val = df['Wert'].mean() 
 
-                text = (f" Der durchschnittliche {par}-Wert beträgt {avg_val: .1f}{unit}. Der tiefste Wert von {min_val: .1f}{unit} wurde {get_occurrence_expression(min_time)} gemessen,\n"
+                text = (f" Der durchschnittliche {self.df_parameters[par]['name_long']}-Wert beträgt {avg_val: .1f}{unit}. Der tiefste Wert von {min_val: .1f}{unit} wurde {get_occurrence_expression(min_time)} gemessen,\n"
                     f" das Maximum von {max_val: .1f}{unit} trat {t_agg['occurrence_expr']} {max_time: {t_agg['time_fmt_occurrence']}} auf.")
                 return text
 
@@ -235,7 +236,7 @@ class App:
                     return ''
 
             t_agg = self.settings['agg_time']
-            text = f"Diese Figur zeigt Zeitreihe von {par} von {self.settings['date_from'] :{t_agg['time_fmt_from_to']}} bis {self.settings['date_to'] :{t_agg['time_fmt_from_to']}}. "\
+            text = f"Diese Figur zeigt Zeitreihe von {self.df_parameters[par]['name_long']} von {self.settings['date_from'] :{t_agg['time_fmt_from_to']}} bis {self.settings['date_to'] :{t_agg['time_fmt_from_to']}}. "\
                 f"Die Messwerte wurden zu einem Wert pro {self.settings['agg_time']['agg_interval']} aggregiert.{min_max_comment()}{band_expr()}"
             return text 
         
@@ -255,7 +256,7 @@ class App:
         def prepare_plot(df, par, par_title):
             t_agg = self.settings['agg_time']
             self.settings['lines'], legend_colors = self.get_lines(par)
-            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {t_agg['title']}"
+            self.settings['plot_title'] = f"{self.df_parameters[par]['name_long']} an Station {self.station['name']}: {t_agg['title']}"
             self.settings['tooltip'] = list(df.columns)
             self.settings['tooltip'] = [alt.Tooltip(f"{t_agg['col']}:T", format=t_agg['time_fmt_occurrence']), alt.Tooltip('Wert:Q', format='.1f')]
             self.settings['color'] = alt.Color('Legende:N', 
@@ -298,7 +299,6 @@ class App:
                     chart += line
             st.altair_chart(chart)
             
-
         self.get_settings(self.settings['agg_time']['settings'], self.settings['agg_time']['defaults'])
         
         for par in self.settings['parameters']:
@@ -345,7 +345,7 @@ class App:
                 return text
                 
             min_max_comment()
-            text = f"Diese Figur zeigt Zeitreihe von {par} von {self.settings['years'][0]} bis {self.settings['years'][1]} an Station {self.station['name']}. "\
+            text = f"Diese Figur zeigt Zeitreihe von {self.df_parameters[par]['name_long']} von {self.settings['years'][0]} bis {self.settings['years'][1]} an Station {self.station['name']}. "\
                 f"Die Messwerte wurden zu einem Wert pro {self.settings['agg_time']['agg_interval']} aggregiert (Mittelwert).{min_max_comment()}{get_guidelines()}"
             return text 
 
@@ -364,7 +364,7 @@ class App:
         def prepare_plot(df, par, par_title):
             t_agg = self.settings['agg_time']
             self.settings['lines'], legend_colors = self.get_lines(par)
-            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {t_agg['title']}"
+            self.settings['plot_title'] = f"{self.df_parameters[par]['name_long']} an Station {self.station['name']}: {t_agg['title']}"
             self.settings['bar_width'] = plot_width / 2 / len(df) 
             self.settings['tooltip'] = list(df.columns)
             self.settings['color'] = alt.Color('Legende:N', 
@@ -448,7 +448,7 @@ class App:
             
             min_max_comment()
             t_agg = self.settings['agg_time']
-            text = f"Diese Figur zeigt die Heatmap von {par} mit {t_agg['title']}n von {self.settings['years'][0]} bis {self.settings['years'][1]} an Station {self.station['name']}."
+            text = f"Diese Figur zeigt die Heatmap von {self.df_parameters[par]['name_long']} mit {t_agg['title']}n von {self.settings['years'][0]} bis {self.settings['years'][1]} an Station {self.station['name']}."
     
             return text 
 
@@ -465,7 +465,7 @@ class App:
 
         def prepare_plot(df, par, par_title):
             t_agg = self.settings['agg_time']
-            self.settings['plot_title'] = f"{par} an Station {self.station['name']}: {t_agg['title']}"
+            self.settings['plot_title'] = f"{self.df_parameters[par]['name_long']} an Station {self.station['name']}: {t_agg['title']}"
             self.settings['tooltip'] = list(df.columns)
             
             self.settings['x'] = alt.X(f"{t_agg['col']}:N", 
@@ -501,7 +501,7 @@ class App:
                     AgGrid(df)
                     st.markdown(tools.get_table_download_link(df), unsafe_allow_html=True)
             else:
-                st.warning(f"Für {par} wurde mit diesen Filtereinstellungen keine Werte gefunden")
+                st.warning(f"Für {self.df_parameters[par]['name_long']} wurde mit diesen Filtereinstellungen keine Werte gefunden")
 
 
     def show_menu(self):

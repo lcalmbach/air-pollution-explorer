@@ -27,10 +27,15 @@ Schuld am bodennahen Ozon sind die beiden Vorläuferschadstoffe Stickoxide (NOX)
 - Industrie und Gewerbe.
 Die Massnahmen des Bundes zur Reduktion des Sommersmogs konzentrieren sich auf die dauerhafte Eindämmung der Vorläuferschadstoffe. Da ein Teil der Belastung in der Schweiz ebenso aus Quellen in anderen Ländern stammt, müssen die Reduktionsbemühungen ebenso auf internationaler Ebene fortgesetzt werden. (Text von: [BAFU, Luftqualität](https://www.bafu.admin.ch/bafu/de/home/themen/luft/fachinformationen/luftqualitaet-in-der-schweiz/feinstaub.html))
 
+### Stickstoffdioxid (NO₂)
+Der Begriff «Stickoxide» ist eine Sammelbezeichnung für eine Vielzahl von Stickstoff-Sauerstoff-Verbindungen. In Bezug auf die Lufthygiene sind Stickstoffmonoxid (NO) und Stickstoffdioxid (NO₂) die wichtigsten. Stickoxide gehören im Sommer zu  den Hauptverursachern von Smog.  In der kalten Jahreszeit entsteht aus gasförmigen Stickoxiden und Ammoniak das partikelförmige Ammoniumnitrat, das zur grossräumigen Belastung durch Feinstaub (PM10) beiträgt. Ausserdem sind Stickoxide wichtige Vorläufersubstanzen von bodennahem Ozon.
+
 ### Grenzwerte
 | Schadstoff  | Grenze  |Beschreibung   |
 |---|---|---|
 | PM2.5 |10µg/m³| Grenzwert für das Jahresmittel |
 | PM10 |20µg/m³ | Grenzwert für das Jahresmittel |
-| PM10 |50µg/m³ | 24 Stunden Grenzwert, darf 3 mal pro Jahr überschritten werden |
-| Ozone |120µg/m³ | Stündlicher Mittelwert darf einmal pro Jahr überschritten werden |
+| PM10 |50µg/m³ | 24 Stunden Grenzwert, darf höchstens 3 Mal pro Jahr überschritten werden |
+| Ozone |120µg/m³ | Stündlicher Mittelwert darf höchstens einmal pro Jahr überschritten werden |
+| NO₂ |30µg/m³ | Grenzwert für das Jahresmittel |
+| NO₂ |80µg/m³ | 24 Stunden Grenzwert, darf höchstens einmal pro Jahr überschritten werden |

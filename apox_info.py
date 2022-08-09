@@ -21,7 +21,7 @@ class App:
             rec = self.df_data.sort_values(by='zeit',ascending=False).head(1)
             rec.rename(columns={rec.columns[0]:'value'})
             for par in self.df_parameters:
-                text += f"- **{par}**: {rec.iloc[0][par] :.1f}{self.df_parameters[par]['unit']} \n"
+                text += f"- **{self.df_parameters[par]['name_short']}**: {rec.iloc[0][par] :.1f}{self.df_parameters[par]['unit']} \n"
             return text
 
         stations = len(self.df_stations)
