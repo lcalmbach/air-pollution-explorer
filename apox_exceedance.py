@@ -105,7 +105,7 @@ class App:
                 cols.append({'name':'Überschreitungen(%)', 'type':["numericColumn","numberColumnFilter","customNumericFormat"], 'precision':1})
                 return cols
 
-            df = df.groupby(['jahr',gl['time_agg_field']])[rec['name_short']].agg(['mean', 'count']).reset_index()
+            df = df.groupby(['jahr',gl['time_agg_field']])[par].agg(['mean', 'count']).reset_index()
             df['exceedance'] = df['mean'] - gl['value']
             df['is_exceedance'] = df['exceedance'].apply(lambda val: 1 if val > 0 else 0)
             df['no_exceedance'] = abs(df['is_exceedance'] - 1)
@@ -142,8 +142,8 @@ class App:
                 cols.append({'name':'Überschreitungen(%)', 'type':["numericColumn","numberColumnFilter","customNumericFormat"], 'precision':1})
                 return cols
 
-            df = df[['jahr', rec['name_short']]]
-            df['exceedance'] = df[rec['name_short']] - gl['value']
+            df = df[['jahr', par]]
+            df['exceedance'] = df[par] - gl['value']
             df['is_exceedance'] = df['exceedance'].apply(lambda val: 1 if val > 0 else 0)
             df['no_exceedance'] = abs(df['is_exceedance'] - 1)
             
